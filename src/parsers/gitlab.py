@@ -1,31 +1,24 @@
 from __future__ import annotations
 
-from src.additional import Student, trace
+from src.additional import Student, trace, internet_on
 
-from logging import info, warning
-from urllib import request
+from logging import info
 import requests as rq
+import configparser
 import datetime
 
-
-def internet_on(host):
-    try:
-        request.urlopen(host, timeout=1)
-        return True
-    except request.URLError as _:
-        warning(f"WARNING: Connection to {host} failed!")
-        return False
+config = configparser.ConfigParser()
+config.read("config/settings.ini")
 
 
 @trace
-def parse_commits(peoples: list[Student], host: str) -> dict[str: int | None]:
+def parse_commits(students: list[Student]) -> dict[str: int | None]:
     """
     Get commit count by gitlab api for list of students
-    :param peoples: List of students
-    :param host: service url
+    :param students: List of students
     :return: dictionary of the format: 'student_username: number_of_commits_for_the_current_date'
     """
-    if not internet_on(host):
+    if not internet_on(config['Services hosts']['gitlab']):
         return
     after_date = datetime.datetime.now() - datetime.timedelta(1)  # yesterday
     before_date = datetime.datetime.now() + datetime.timedelta(1)  # tomorrow
@@ -33,23 +26,24 @@ def parse_commits(peoples: list[Student], host: str) -> dict[str: int | None]:
     before_date = before_date.strftime("%Y-%m-%d")  # like '2024-03-09'
     return {
         s: c for s, c in zip(
-            [i.git for i in peoples],
-            [parse_student(i.git, after_date, before_date, host) for i in peoples]
+            [i.git for i in students],
+            [parse_student(i.git, after_date, before_date) for i in students]
         )
     }
 
 
-def parse_student(student_git: str, after_date: str, before_date: str, host: str) -> int | None:
+def parse_student(student_git: str, after_date: str, before_date: str) -> int | None:
     """
     Get student commits count on gitlab for the current date
     :param student_git: Gitlab username
     :param after_date: yesterday date
     :param before_date: tomorrow date
-    :param host: service url
     :return: commits count or None in case of a problem with getting data from api
     """
+    if student_git is None:
+        return
     data = rq.get(
-        host + f"/api/v4/users/{student_git}/events", params={
+        config['Services hosts']['gitlab'] + f"/api/v4/users/{student_git}/events", params={
             "action": "commit",
             "after": after_date,
             "before": before_date

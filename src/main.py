@@ -18,10 +18,10 @@ config = configparser.ConfigParser()
 config.read("config/settings.ini")
 
 
-def run_threaded(job_func, peoples, host):
+def run_threaded(job_func, peoples):
     job_thread = threading.Thread(
         target=job_func,
-        args=(peoples, host, )
+        args=(peoples, )
     )
     job_thread.start()
 
@@ -30,13 +30,13 @@ def run_threaded(job_func, peoples, host):
 students = [
     Student(
         "root",
-        None,
+        "None",
         None,
         None
     ),
     Student(
-        "testtest",
-        None,
+        "testtest",  # gitlub nickname
+        "testingworkspace",  # ? plane workspace name
         None,
         None
     ),
@@ -49,27 +49,29 @@ students = [
 ]
 # -
 
-schedule.every().day.at(
-    config['Time']['wakeup time'], config['Time']['timezone']
-).do(run_threaded, parse_activity, students, config['Services hosts']['bookstack'])  # task for bookstack
+schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
+    run_threaded, parse_activity,
+    students,
+)  # task for bookstack
 
-schedule.every().day.at(
-    config['Time']['wakeup time'], config['Time']['timezone']
-).do(run_threaded, parse_commits, students, config['Services hosts']['gitlab'])  # task for gitlab
+schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
+    run_threaded, parse_commits,
+    students,
+)  # task for gitlab
 
-schedule.every().day.at(
-    config['Time']['wakeup time'], config['Time']['timezone']
-).do(run_threaded, parse_active_tasks, students, config['Services hosts']['plane'])  # task for plane
+schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
+    run_threaded, parse_active_tasks,
+    students,
+)  # task for plane
 
-schedule.every().day.at(
-    config['Time']['wakeup time'], config['Time']['timezone']
-).do(run_threaded, parse_active_hours, students, config['Services hosts']['kimai'])  # task for kimai
+schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
+    run_threaded, parse_active_hours,
+    students,
+)  # task for kimai
 
 while True:
     schedule.run_pending()
     sleep(1)
 
 
-#
-# res = parse_commits(students, config['Services hosts']['gitlab'])
-# print(res)
+# run_threaded(parse_commits, students)

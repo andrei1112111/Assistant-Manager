@@ -5,5 +5,5 @@ from src.additional import Student
 import requests as rq
 
 
-def parse_activity(student: list[Student], host: str) -> dict:
+def parse_activity(student: list[Student]) -> dict:
     pass
