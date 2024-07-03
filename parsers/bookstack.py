@@ -1,11 +1,9 @@
 from __future__ import annotations
-from objects import Student, useless_job
 
-from time import localtime
+from objects import Student
+
 import requests as rq
-import json
 
 
-def parse_activity(student: list[Student]) -> dict:
-    useless_job()
-    return {}
+def parse_activity(student: list[Student], host: str) -> dict:
+    pass

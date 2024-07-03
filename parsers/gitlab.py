@@ -1,75 +1,61 @@
 from __future__ import annotations
-from objects import Student, Gitlab, useless_job
 
-import datetime
+from objects import Student, trace
+
+from logging import info, warning
+from urllib import request
 import requests as rq
-import json
+import datetime
 
 
-HOST = "http://localhost:8080"
+def internet_on(host):
+    try:
+        request.urlopen(host, timeout=1)
+        return True
+    except request.URLError as _:
+        warning(f"WARNING: Failed to connect to {host}")
+        return False
 
 
-def parse_commits(peoples: list[Student]) -> list[int | None]:
+@trace
+def parse_commits(peoples: list[Student], host: str) -> dict[str: int | None]:
     """
-    Get commit stats by gitlab api
-    :param peoples:
-    :return:
+    Get commit count by gitlab api for list of students
+    :param peoples: List of students
+    :param host: service url
+    :return: dictionary of the format: 'student_username: number_of_commits_for_the_current_date'
     """
+    if not internet_on(host):
+        return
     after_date = datetime.datetime.now() - datetime.timedelta(1)  # yesterday
     before_date = datetime.datetime.now() + datetime.timedelta(1)  # tomorrow
     after_date = after_date.strftime("%Y-%m-%d")
     before_date = before_date.strftime("%Y-%m-%d")  # like '2024-03-09'
-    # print(after_date.strftime("%Y-%m-%d") + ' -> ' + before_date.strftime("%Y-%m-%d"))
-    for student in peoples:
-        yield parse_student(student, after_date, before_date)
+    return {
+        s: c for s, c in zip(
+            [i.git for i in peoples],
+            [parse_student(i.git, after_date, before_date, host) for i in peoples]
+        )
+    }
 
 
-def parse_student(student: Student, after_date: str, before_date: str) -> int | None:
+def parse_student(student_git: str, after_date: str, before_date: str, host: str) -> int | None:
     """
-    Get student commits count on gitlab for the current day
-    :param student:
-    :param after_date:
-    :param before_date:
-    :return:
+    Get student commits count on gitlab for the current date
+    :param student_git: Gitlab username
+    :param after_date: yesterday date
+    :param before_date: tomorrow date
+    :param host: service url
+    :return: commits count or None in case of a problem with getting data from api
     """
     data = rq.get(
-        HOST + f"/api/v4/users/{student.git.username}/events", params={
+        host + f"/api/v4/users/{student_git}/events", params={
             "action": "commit",
             "after": after_date,
             "before": before_date
         }
     )
     if data.status_code == rq.codes.ok:
-        commit_count = (len(json.loads(data.text)))
-        # with open("testing_responces.json", "w") as file:
-        #     json.dump(json.loads(data.text), file)
-        return commit_count
+        return len(data.json())
     else:
-        print(f"{student.git.username}: {data.status_code}")
-
-
-# parse_commits([])
-
-res = parse_commits(
-    [
-        Student(
-            Gitlab("", "root"),
-            None,
-            None,
-            None
-        ),
-        Student(
-            Gitlab("", "testtest"),
-            None,
-            None,
-            None
-        ),
-        Student(
-            Gitlab("", "not_existing_user"),
-            None,
-            None,
-            None
-        ),
-    ]
-)
-print([i for i in res])
+        info(f"INFO: Gitlab {student_git} - {data.json()['message']}")  # logging the error message
