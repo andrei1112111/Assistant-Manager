@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from objects import Student
+from src.additional import Student
 
 import requests as rq
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from objects import Student, trace
+from src.additional import Student, trace
 
 from logging import info, warning
 from urllib import request
@@ -13,7 +13,7 @@ def internet_on(host):
         request.urlopen(host, timeout=1)
         return True
     except request.URLError as _:
-        warning(f"WARNING: Failed to connect to {host}")
+        warning(f"WARNING: Connection to {host} failed!")
         return False
 
 

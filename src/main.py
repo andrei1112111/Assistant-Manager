@@ -1,8 +1,8 @@
-from parsers.bookstack import parse_activity
-from parsers.gitlab import parse_commits
-from parsers.kimai import parse_active_hours
-from parsers.plane import parse_active_tasks
-from objects import Student
+from src.parsers.bookstack import parse_activity
+from src.parsers.gitlab import parse_commits
+from src.parsers.kimai import parse_active_hours
+from src.parsers.plane import parse_active_tasks
+from src.additional import Student
 
 from time import sleep
 import configparser
@@ -15,7 +15,7 @@ logging.getLogger('').addHandler(logging.StreamHandler(sys.stdout))
 logging.getLogger('').setLevel(logging.INFO)
 
 config = configparser.ConfigParser()
-config.read("settings.ini")
+config.read("config/settings.ini")
 
 
 def run_threaded(job_func, peoples, host):
