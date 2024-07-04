@@ -4,10 +4,10 @@ from src.additional import Student, trace, internet_on
 
 from logging import info
 import requests as rq
-import configparser
+from configparser import ConfigParser
 import datetime
 
-config = configparser.ConfigParser()
+config = ConfigParser()
 config.read("config/settings.ini")
 
 
@@ -26,15 +26,15 @@ def parse_commits(students: list[Student]) -> dict[str: int | None]:
     before_date = before_date.strftime("%Y-%m-%d")  # like '2024-03-09'
     return {
         s: c for s, c in zip(
-            [i.git for i in students],
-            [parse_student(i.git, after_date, before_date) for i in students]
+            [student.git for student in students if student.git is not None],
+            [parse_student(student.git, after_date, before_date) for student in students if student.git is not None]
         )
     }
 
 
 def parse_student(student_git: str, after_date: str, before_date: str) -> int | None:
     """
-    Get student commits count on gitlab for the current date
+    Get student commits count on gitlab between before_date and after_date
     :param student_git: Gitlab username
     :param after_date: yesterday date
     :param before_date: tomorrow date
@@ -52,4 +52,4 @@ def parse_student(student_git: str, after_date: str, before_date: str) -> int | 
     if data.status_code == rq.codes.ok:
         return len(data.json())
     else:
-        info(f"INFO: Gitlab {student_git} - {data.json()['message']}")  # logging the error message
+        info(f"[INFO] Gitlab user '{student_git}' - {data.json()['message']}")  # logging the error message

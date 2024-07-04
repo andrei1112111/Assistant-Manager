@@ -4,9 +4,9 @@ from src.additional import Student, trace, internet_on
 
 from logging import info
 import requests as rq
-import configparser
+from configparser import ConfigParser
 
-config = configparser.ConfigParser()
+config = ConfigParser()
 config.read("config/settings.ini")
 
 issue_states = {
@@ -29,8 +29,8 @@ def parse_active_tasks(students: list[Student]) -> dict[str: list[str]]:
         return
     return {
         s: c for s, c in zip(
-            [i.plane for i in students],
-            [[j for j in parse_student(i.plane)] for i in students]
+            [student.plane for student in students if student.plane is not None],
+            [[j for j in parse_student(student.plane)] for student in students if student.plane is not None]
         )
     }
 
@@ -47,9 +47,10 @@ def parse_student(student_plane: str) -> list[str] | None:
         config['Services hosts']['plane'] + f"/api/v1/workspaces/{student_plane}/projects/", headers={
             "x-api-key": config['API Tokens']['plane']
         }
-    )
+    )  # get projects in workspace
     if data.status_code != rq.codes.ok:
-        info(f"INFO: Plane {student_plane} - {data.json()['detail']}")  # logging the error message
+        info(f"[INFO] Plane (get projects) user '{student_plane}' - {data.json()['detail']}")  # \
+        # \ logging the error message
         return
     projects = data.json()["results"]  # get all projects in workspace
     for proj in projects:
@@ -58,7 +59,11 @@ def parse_student(student_plane: str) -> list[str] | None:
             headers={
                 "x-api-key": config['API Tokens']['plane']
             }
-        ).json()["results"]  # get all issues in projects
-        for issue in issues:
+        )  # get all issues in projects
+        if issues.status_code != rq.codes.ok:
+            info(f"[INFO] Plane (get issues) user '{student_plane}' - {issues.json()['detail']}")  # \
+            # \ logging the error message
+            return
+        for issue in issues.json()["results"]:
             if issue_states[issue["state"]] == "in progress":
                 yield issue["name"]  # return all issues 'in projects'

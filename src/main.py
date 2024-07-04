@@ -1,27 +1,32 @@
+from typing import List
+
 from src.parsers.bookstack import parse_activity
 from src.parsers.gitlab import parse_commits
 from src.parsers.kimai import parse_active_hours
 from src.parsers.plane import parse_active_tasks
-from src.additional import Student
+from src.additional import Student, check_config
 
 from time import sleep
-import configparser
+from configparser import ConfigParser
 import threading
 import schedule
 import logging
 import sys
 
+CONFIG_PATH = "config/settings.ini"
+
 logging.getLogger('').addHandler(logging.StreamHandler(sys.stdout))
 logging.getLogger('').setLevel(logging.INFO)
 
-config = configparser.ConfigParser()
-config.read("config/settings.ini")
+check_config(CONFIG_PATH)
+config = ConfigParser()
+config.read(CONFIG_PATH)
 
 
-def run_threaded(job_func, peoples):
+def run_threaded(job_func, peoples: List[Student]):
     job_thread = threading.Thread(
         target=job_func,
-        args=(peoples, )
+        args=(peoples,)
     )
     job_thread.start()
 
@@ -32,16 +37,22 @@ students = [
         "root",
         "None",
         None,
-        None
+        "admin"
     ),
     Student(
         "testtest",  # gitlub nickname
         "testingworkspace",  # ? plane workspace name
         None,
-        None
+        "TestUser1"
     ),
     Student(
         "not_existing_user",
+        None,
+        None,
+        "not exist"
+    ),
+    Student(
+        None,
         None,
         None,
         None
@@ -72,6 +83,3 @@ schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone'
 while True:
     schedule.run_pending()
     sleep(1)
-
-
-# run_threaded(parse_commits, students)
