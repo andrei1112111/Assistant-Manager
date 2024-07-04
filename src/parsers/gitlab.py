@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.additional import Student, trace, internet_on
+from additional import Student, trace, internet_on
 
 from logging import info
 import requests as rq

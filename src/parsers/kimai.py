@@ -2,7 +2,7 @@ from __future__ import annotations
 
 import requests.exceptions
 
-from src.additional import Student, trace, internet_on
+from additional import Student, trace, internet_on
 
 from logging import info
 import requests as rq

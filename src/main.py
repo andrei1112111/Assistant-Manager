@@ -1,10 +1,10 @@
 from typing import List
 
-from src.parsers.bookstack import parse_activity
-from src.parsers.gitlab import parse_commits
-from src.parsers.kimai import parse_active_hours
-from src.parsers.plane import parse_active_tasks
-from src.additional import Student, check_config
+from parsers.bookstack import parse_activity
+from parsers.gitlab import parse_commits
+from parsers.kimai import parse_active_hours
+from parsers.plane import parse_active_tasks
+from additional import Student, check_config
 
 from time import sleep
 from configparser import ConfigParser
@@ -80,6 +80,7 @@ schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone'
     students,
 )  # task for kimai
 
+print(f"Script is waiting for {config['Time']['wakeup time']}...")
 while True:
     schedule.run_pending()
     sleep(1)

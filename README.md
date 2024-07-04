@@ -10,6 +10,7 @@ Make sure Python3.8.10 or later is installed and added to the PATH together with
 ```bash
 git clone https://gitlab.sberlab.nsu.ru/a.tishkin/sberlab_nsu_assistant
 cd sberlab_nsu_assistant
+chmod +x setup.sh
 ./setup.sh
 ```
 

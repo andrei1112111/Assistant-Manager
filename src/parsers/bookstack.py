@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.additional import Student
+from additional import Student
 
 from configparser import ConfigParser
 import requests as rq
