@@ -16,7 +16,7 @@ config.read("config/settings.ini")
 @trace
 def parse_active_hours(students: list[Student]) -> dict[str: int] | None:
     """
-    .?.
+    Get total timesheets duration by kimai api for list of students
     :param students: List of students
     :return: total timesheets duration in minutes for every student
     """
