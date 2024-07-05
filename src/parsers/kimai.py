@@ -1,40 +1,37 @@
 from __future__ import annotations
 
-import requests.exceptions
+from common.common import Student, trace, internet_on
 
-from additional import Student, trace, internet_on
-
-from logging import info
+from logging import warning
 import requests as rq
-from configparser import ConfigParser
 import datetime
-
-config = ConfigParser()
-config.read("config/settings.ini")
 
 
 @trace
-def parse_active_hours(students: list[Student]) -> dict[str: int] | None:
+def parse_active_hours(students: list[Student], host: str, token: str, secret: str) -> dict[str: int] | None:
     """
     Get total timesheets duration by kimai api for list of students
     :param students: List of students
+    :param host: server address
+    :param token: API kimai token
+    :param secret: secret key is not required
     :return: total timesheets duration in minutes for every student
     """
-    if not internet_on(config['Services hosts']['kimai']):
+    if not internet_on(host):
         return
     result = {}
     users = rq.get(
-        config['Services hosts']['kimai'] + f"/api/users", headers={
-            "Authorization": f"Bearer {config['API Tokens']['kimai']}",
+        host + f"/api/users", headers={
+            "Authorization": f"Bearer {token}",
         }, params={
             "visible": "3"
         }
     )  # get all users [{user dict with "id"}]
     if users.status_code != rq.codes.ok:
         try:
-            info(f"[WARNING] kimai (get users) - {users.json()['message']}")  # logging the error message
-        except requests.exceptions.JSONDecodeError:
-            info(f"[WARNING] kimai (get users) return NOTHING. Maybe this is an authorization error")  # \
+            warning(f"Kimai (get users) - {users.json()['message']}")  # logging the error message
+        except rq.exceptions.JSONDecodeError:
+            warning(f"Kimai (get users) return NOTHING. Maybe this is an authorization error")  # \
             # \ logging the error message
         return
     users = users.json()
@@ -47,8 +44,8 @@ def parse_active_hours(students: list[Student]) -> dict[str: int] | None:
     current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
     for user in usernames.keys():
         timesheets = rq.get(
-            config['Services hosts']['kimai'] + f"/api/timesheets", headers={
-                "Authorization": f"Bearer {config['API Tokens']['kimai']}"
+            host + f"/api/timesheets", headers={
+                "Authorization": f"Bearer {token}"
             }, params={
                 "user": user,
                 "begin": f"{current_date}T00:00:00",  # by server time
@@ -56,7 +53,7 @@ def parse_active_hours(students: list[Student]) -> dict[str: int] | None:
             }
         )  # get user timesheets
         if timesheets.status_code != rq.codes.ok:
-            info(f"[WARNING] kimai (get timesheets) - {users['message']}")  # logging the error message
+            warning(f"Kimai (get timesheets) - {users['message']}")  # logging the error message
             return
         result[usernames[user]] = sum([timesheet["duration"] for timesheet in timesheets.json()])  # \
         # \ result[username] = sum of timesheet durations

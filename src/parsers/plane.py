@@ -1,13 +1,9 @@
 from __future__ import annotations
 
-from additional import Student, trace, internet_on
+from common.common import Student, trace, internet_on
 
 from logging import info
 import requests as rq
-from configparser import ConfigParser
-
-config = ConfigParser()
-config.read("config/settings.ini")
 
 issue_states = {
     "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",
@@ -19,49 +15,54 @@ issue_states = {
 
 
 @trace
-def parse_active_tasks(students: list[Student]) -> dict[str: list[str]]:
+def parse_active_tasks(students: list[Student], host: str, token: str, secret: str) -> dict[str: list[str]]:
     """
     Get active issues for students workspace
     :param students: student's workspace
+    :param host: server address
+    :param token: API kimai token
+    :param secret: secret key is not required
     :return: active issues for every student workspace
     """
-    if not internet_on(config['Services hosts']['plane']):
+    if not internet_on(host):
         return
     return {
         s: c for s, c in zip(
             [student.plane for student in students if student.plane is not None],
-            [[j for j in parse_student(student.plane)] for student in students if student.plane is not None]
+            [[j for j in parse_student(student.plane, host, token)] for student in students if student.plane is not None]
         )
     }
 
 
-def parse_student(student_plane: str) -> list[str] | None:
+def parse_student(student_plane: str, host: str, token: str) -> list[str] | None:
     """
     Get active issues for current student workspace
     :param student_plane: student's workspace
+    :param host: server address
+    :param token: API kimai token
     :return: list of active issues
     """
     if student_plane is None:
         return
     data = rq.get(
-        config['Services hosts']['plane'] + f"/api/v1/workspaces/{student_plane}/projects/", headers={
-            "x-api-key": config['API Tokens']['plane']
+        host + f"/api/v1/workspaces/{student_plane}/projects/", headers={
+            "x-api-key": token
         }
     )  # get projects in workspace
     if data.status_code != rq.codes.ok:
-        info(f"[INFO] Plane (get projects) user '{student_plane}' - {data.json()['detail']}")  # \
+        info(f"Plane (get projects) user '{student_plane}' - {data.json()['detail']}")  # \
         # \ logging the error message
         return
     projects = data.json()["results"]  # get all projects in workspace
     for proj in projects:
         issues = rq.get(
-            config['Services hosts']['plane'] + f"/api/v1/workspaces/{student_plane}/projects/{proj['id']}/issues/",
+            host + f"/api/v1/workspaces/{student_plane}/projects/{proj['id']}/issues/",
             headers={
-                "x-api-key": config['API Tokens']['plane']
+                "x-api-key": token
             }
         )  # get all issues in projects
         if issues.status_code != rq.codes.ok:
-            info(f"[INFO] Plane (get issues) user '{student_plane}' - {issues.json()['detail']}")  # \
+            info(f"Plane (get issues) user '{student_plane}' - {issues.json()['detail']}")  # \
             # \ logging the error message
             return
         for issue in issues.json()["results"]:

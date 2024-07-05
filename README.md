@@ -31,11 +31,11 @@ And __Run__ it using:
 ...
 timezone = Asia/Novosibirsk
 ```
-* Look at wakeup time 
+* Look at schedule time 
 ```
 [Time]
 ...
-wakeup time = 12:39
+schedule_time = 12:39
 ```
 * Check the Service addresses 
 ```
