@@ -1,0 +1,24 @@
+annotated-types==0.7.0
+APScheduler==3.10.4
+backports.zoneinfo==0.2.1
+bookstack==0.2.0.post1
+cached-property==1.5.2
+certifi==2024.6.2
+charset-normalizer==3.3.2
+eval_type_backport==0.2.0
+idna==3.7
+inflection==0.4.0
+kimai-python @ git+https://github.com/kbancerz/kimai-python.git@c5401acca8fe8cfa7db486dee5a215bd7daea95b
+psycopg2==2.9.9
+pydantic==2.8.2
+pydantic_core==2.20.1
+python-dateutil==2.9.0.post0
+python-dotenv==1.0.1
+pytz==2024.1
+requests==2.32.3
+schedule==1.2.2
+six==1.16.0
+SQLAlchemy==2.0.31
+typing_extensions==4.12.2
+tzlocal==5.2
+urllib3==2.2.2
