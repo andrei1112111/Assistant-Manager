@@ -3,6 +3,8 @@ from .models.service_model import Student
 from .get_request import get_request
 from src.logger import warning
 import datetime
+from pytz import timezone
+from src.config import config
 
 
 class BookStack(Service):
@@ -11,7 +13,9 @@ class BookStack(Service):
             warning(f"Student '{student.name}' does not have Bookstack username.")
             return True
 
-        current_date = datetime.datetime.now()  # current date
+        current_date = datetime.datetime.now(
+            tz=timezone(config.time.timezone)
+        )  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         user_id = get_request(  # get all users with name like student.Bookstack_username

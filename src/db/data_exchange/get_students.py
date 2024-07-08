@@ -7,11 +7,11 @@ from src.logger import info
 
 
 def get_students_from_db() -> List[Student]:
-    # get all objects
+    # get all Students from db
     students_db = bd_session.query(StudentDB).all()
     students = []
 
-    for student_db in students_db:
+    for student_db in students_db:  # transfer data StudentDB -> Student for Services
         students.append(
             Student(
                 id=student_db.id,

@@ -3,6 +3,8 @@ from .models.service_model import Student
 from .get_request import get_request
 from src.logger import warning
 import datetime
+from pytz import timezone
+from src.config import config
 
 
 class GitLab(Service):
@@ -11,9 +13,10 @@ class GitLab(Service):
             warning(f"Student '{student.name}' does not have Gitlab username.")
             return True
 
-        yesterday_date = datetime.datetime.now() - datetime.timedelta(1)  # yesterday
-        tomorrow_date = datetime.datetime.now() + datetime.timedelta(1)  # tomorrow
+        yesterday_date = datetime.datetime.now(tz=timezone(config.time.timezone)) - datetime.timedelta(1)  # yesterday
         yesterday_date = yesterday_date.strftime("%Y-%m-%d")
+
+        tomorrow_date = datetime.datetime.now(tz=timezone(config.time.timezone)) + datetime.timedelta(1)  # tomorrow
         tomorrow_date = tomorrow_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         student_commits = get_request(  # get all commits by student.GitLab_username created today
@@ -32,7 +35,7 @@ class GitLab(Service):
         if student_commits.status_code == 200:  # 'OK' statis code
             student.commits_count = len(student_commits.json())  # set commits count
         else:
-            warning(f"For Gitlab user '{student.GitLab_username}' an error has occurred:"
-                    f" '{student_commits.json()['message']}'.")
+            warning(f"For student '{student.name}' with Gitlab username '{student.GitLab_username}'"
+                    f" an error has occurred: '{student_commits.json()['message']}'.")
 
         return True

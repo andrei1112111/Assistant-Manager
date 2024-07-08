@@ -3,9 +3,9 @@ from typing_extensions import Annotated
 from pydantic import BaseModel, AfterValidator
 from .config_validators import *
 
-TimezoneType = Annotated[str, AfterValidator(validate_timezone)]
+TimezoneType = Annotated[str, AfterValidator(validate_timezone)]  # annotated type for validation field
 
-Schedule_timeType = Annotated[str, AfterValidator(validate_schedule_time)]
+Schedule_timeType = Annotated[str, AfterValidator(validate_schedule_time)]  # also annotated type for validation field
 
 
 class TimeConfig(BaseModel):

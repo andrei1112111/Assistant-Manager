@@ -2,6 +2,8 @@ from .models import Service, Student
 from .get_request import get_request
 from src.logger import error, warning
 import datetime
+from pytz import timezone
+from src.config import config
 
 
 class Kimai(Service):
@@ -24,16 +26,15 @@ class Kimai(Service):
             return False  # failed to connect
 
         if users.status_code != 200:
-            # logging the error message
             if "message" in users.json().keys():
-                error(f"Kimai (get users) returns an error: '{users.json()['message']}' !")
+                error(f"Kimai (when get users) returns an error: '{users.json()['message']}' !")
             else:
-                error(f"Kimai (get users) return NOTHING! Maybe this is an authorization error !")  # \
+                error(f"Kimai (when get users) return NOTHING! Maybe this is an authorization error !")  # \
             return False  # failed to use api
 
         users = users.json()
 
-        current_date = datetime.datetime.now()  # current date
+        current_date = datetime.datetime.now(tz=timezone(config.time.timezone))  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         # find kimai user_id's by student Kimai_username
@@ -46,7 +47,7 @@ class Kimai(Service):
                     f" or has a different username from the specified one! ")
             return True
 
-        user_id = users_with_same_name[0]
+        user_id = users_with_same_name[0]  # there is probably only one such user
 
         # get user timesheets
         timesheets = get_request(
