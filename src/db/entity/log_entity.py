@@ -4,6 +4,7 @@ from .base_entity import Base
 
 from datetime import datetime
 
+
 class LogDB(Base):
     __tablename__ = "logbook"
 

@@ -2,7 +2,7 @@ import pytz
 
 
 def validate_timezone(timezone: str) -> str:
-    try:
+    try:  # try to load timezone
         pytz.timezone(timezone)
     except pytz.exceptions.UnknownTimeZoneError:
         assert isinstance(timezone, pytz.BaseTzInfo), f"Timezone '{timezone}' is invalid"
@@ -11,6 +11,7 @@ def validate_timezone(timezone: str) -> str:
 
 
 def validate_schedule_time(time: str) -> str:
+    # simple time validation
     assert (len(time) == 5 or all(
         [
             time[0].isdigit(), time[1].isdigit(), time[2] == ':', time[3].isdigit(), time[4].isdigit()

@@ -11,17 +11,17 @@ class GitLab(Service):
             warning(f"Student '{student.name}' does not have Gitlab username.")
             return True
 
-        after_date = datetime.datetime.now() - datetime.timedelta(1)  # yesterday
-        before_date = datetime.datetime.now() + datetime.timedelta(1)  # tomorrow
-        after_date = after_date.strftime("%Y-%m-%d")
-        before_date = before_date.strftime("%Y-%m-%d")  # like '2024-03-09'
+        yesterday_date = datetime.datetime.now() - datetime.timedelta(1)  # yesterday
+        tomorrow_date = datetime.datetime.now() + datetime.timedelta(1)  # tomorrow
+        yesterday_date = yesterday_date.strftime("%Y-%m-%d")
+        tomorrow_date = tomorrow_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
-        student_commits = get_request(
+        student_commits = get_request(  # get all commits by student.GitLab_username created today
             url=self.url + f"/api/v4/users/{student.GitLab_username}/events",
             params={
                 "action": "commit",
-                "after": after_date,
-                "before": before_date
+                "after": yesterday_date,
+                "before": tomorrow_date
             },
             headers={}
         )
@@ -30,9 +30,9 @@ class GitLab(Service):
             return False  # failed to connect
 
         if student_commits.status_code == 200:  # 'OK' statis code
-            student.commits_count = len(student_commits.json())  # write commits count
+            student.commits_count = len(student_commits.json())  # set commits count
         else:
             warning(f"For Gitlab user '{student.GitLab_username}' an error has occurred:"
-                    f" '{student_commits.json()['message']}'.")  # logging the error message
+                    f" '{student_commits.json()['message']}'.")
 
         return True

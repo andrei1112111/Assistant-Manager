@@ -10,7 +10,7 @@ class Kimai(Service):
             warning(f"Student '{student.name}' does not have Kimai username.")
             return True
 
-        users = get_request(
+        users = get_request(  # get all users
             url=self.url + f"/api/users",
             headers={
                 "Authorization": f"Bearer {self.token}",
@@ -18,7 +18,7 @@ class Kimai(Service):
             params={
                 "visible": "3"
             }
-        )  # get all users [{user dict with "id"}]
+        )
 
         if users is None:
             return False  # failed to connect
@@ -60,10 +60,13 @@ class Kimai(Service):
         )
 
         if timesheets.status_code != 200:
-            warning(f"An error occurred while receiving the timesheets on Kimai: '{users['message']}'")
+            if "message" in timesheets.json().keys():
+                warning(f"An error occurred while receiving the timesheets on Kimai: '{timesheets.json()['message']}'")
+            else:
+                warning(f"Kimai api return's nothing when timesheets are requested.")
             return True
 
-        student.worked_time = sum(
+        student.worked_time = sum(  # set sum of timesheets duration
             [
                 timesheet["duration"] for timesheet in timesheets.json()
             ]

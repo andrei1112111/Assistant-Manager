@@ -14,7 +14,7 @@ class BookStack(Service):
         current_date = datetime.datetime.now()  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
-        user_id = get_request(
+        user_id = get_request(  # get all users with name like student.Bookstack_username
             url=self.url + "/api/users",
             headers={
                 "Authorization": f"Token {self.token}:{self.secret}"
@@ -27,12 +27,12 @@ class BookStack(Service):
         if user_id is None:
             return False  # failed to connect
 
-        if user_id.json()["total"] == 0:
+        if user_id.json()["total"] == 0:  # such users are not founded
             warning(f"The user '{student.name}' is not registered in the Bookstack"
                     f" or has a different username from the specified one! ")
             return True
 
-        audit = get_request(
+        audit = get_request(  # get changes-log for student.Bookstack_username-id created today
             url=self.url + "/api/audit-log",
             headers={
                 "Authorization": f"Token {self.token}:{self.secret}"
@@ -46,6 +46,6 @@ class BookStack(Service):
         if audit is None:
             return False  # failed to connect
 
-        student.bookstack_changes = audit.json()["total"]  # number of changes
+        student.bookstack_changes = audit.json()["total"]  # set number of changes
 
         return True

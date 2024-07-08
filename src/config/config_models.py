@@ -3,14 +3,14 @@ from typing_extensions import Annotated
 from pydantic import BaseModel, AfterValidator
 from .config_validators import *
 
-TimezoneT = Annotated[str, AfterValidator(validate_timezone)]
+TimezoneType = Annotated[str, AfterValidator(validate_timezone)]
 
-Schedule_timeT = Annotated[str, AfterValidator(validate_schedule_time)]
+Schedule_timeType = Annotated[str, AfterValidator(validate_schedule_time)]
 
 
 class TimeConfig(BaseModel):
-    timezone: TimezoneT
-    schedule_time: Schedule_timeT
+    timezone: TimezoneType
+    schedule_time: Schedule_timeType
 
 
 class ServiceApiConfigModel(BaseModel):

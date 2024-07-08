@@ -8,7 +8,7 @@ issue_states = {
     "febb8d6b-e80e-4ade-aedf-0883e3583bce": "todo",
     "48c89c98-0074-413a-afbe-0968b421fd5d": "cancelled",
     "614a4ab9-e51d-4427-b803-1677fc49bef5": "backlog"
-}  # (state: representation)
+}  # meaning of status codes
 
 
 class Plane(Service):
@@ -17,13 +17,13 @@ class Plane(Service):
             warning(f"Student '{student.name}' does not have Plane workspace.")
             return True
 
-        projects = get_request(
+        projects = get_request(  # get projects in workspace
             url=self.url + f"/api/v1/workspaces/{student.Plane_workspace}/projects/",
             headers={
                 "x-api-key": self.token
             },
             params={}
-        )  # get projects in workspace
+        )
 
         if projects is None:
             return False  # failed to connect
@@ -35,12 +35,13 @@ class Plane(Service):
         projects = projects.json()["results"]
 
         for project in projects:
-            issues = get_request(
+            issues = get_request(  # get all issues in projects
                 url=self.url + f"/api/v1/workspaces/{student.Plane_workspace}/projects/{project['id']}/issues/",
                 headers={
                     "x-api-key": self.token
-                }
-            )  # get all issues in projects
+                },
+                params={}
+            )
 
             if issues.status_code != 200:
                 warning(f"Plane error receiving information about student's '{student.name}'"
@@ -50,9 +51,9 @@ class Plane(Service):
             active_issues = []
             for issue in issues.json()["results"]:
                 if issue_states[issue["state"]] == "in progress":
-                    active_issues.append(issue["name"])  # save all issues 'in projects'
+                    active_issues.append(issue["name"])  # save all issues with status 'in progress'
 
-            active_issues = active_issues.sort()  # issues sorted by alphabetic orger
+            active_issues = active_issues.sort()  # issues are sorted by alphabetic orger
             student.active_tasks = active_issues
 
             return True

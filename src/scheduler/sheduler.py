@@ -5,7 +5,7 @@ scheduler = BlockingScheduler()
 
 
 def start_scheduler(func):
-    schedule_time = config.time.schedule_time.split(':')
+    schedule_time = config.time.schedule_time.split(':')  # [hour, minute]
 
     scheduler.add_job(
         func,
