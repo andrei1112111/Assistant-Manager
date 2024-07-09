@@ -15,7 +15,7 @@ def connect_db():
     try:
         engine.connect()
     except exc.OperationalError:
-        logger.warning("Failed to connect to database: Connection refused")
+        logger.critical("Failed to connect to database: Connection refused")
         exit()
 
     logger.info("Create schema")
