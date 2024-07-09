@@ -9,6 +9,7 @@ from src.config import config
 
 class BookStack(Service):
     def parse_student_activity(self, student: Student) -> bool:
+        student.bookstack_changes = 0
         if student.Bookstack_username is None:
             logger.warning(f"Student '{student.name}' does not have Bookstack username.")
             return True

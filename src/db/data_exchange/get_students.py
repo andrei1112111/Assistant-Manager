@@ -10,25 +10,34 @@ def get_students_from_db() -> List[Student]:
     # get all Students from db
     students_db = bd_session.query(StudentDB).all()
     students = []
-
     for student_db in students_db:  # transfer data StudentDB -> Student for Services
-        students.append(
-            Student(
-                id=student_db.id,
-                name=student_db.name,
+        if student_db.is_active is True:
+            student = Student(
+                    id=student_db.id,
+                    name=student_db.name + " " + student_db.surname,
 
-                GitLab_username=student_db.logins["gitlab"],
-                Plane_workspace=student_db.logins["plane"],
-                Bookstack_username=student_db.logins["bookstack"],
-                Kimai_username=student_db.logins["kimai"],
+                    GitLab_username=None,
+                    Plane_workspace=None,
+                    Bookstack_username=None,
+                    Kimai_username=None,
 
-                commits_count=0,
-                worked_time=0,
-                active_tasks=[],
-                bookstack_changes=0
-            )
-        )
+                    commits_count=-1,
+                    worked_time=-1,
+                    active_tasks=["none"],
+                    bookstack_changes=-1
+                )
 
-    logger.info("Information about students has been received successfully")
+            if "gitlab" in student_db.logins.keys():
+                student.GitLab_username = student_db.logins["gitlab"]
+            if "plane" in student_db.logins.keys():
+                student.Plane_workspace = student_db.logins["plane"]
+            if "bookstack" in student_db.logins.keys():
+                student.Bookstack_username = student_db.logins["bookstack"]
+            if "kimai" in student_db.logins.keys():
+                student.Kimai_username = student_db.logins["kimai"]
+
+            students.append(student)
+
+    logger.info(f"Information about students has been received successfully. Received {len(students_db)} students.")
 
     return students

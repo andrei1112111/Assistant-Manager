@@ -8,6 +8,7 @@ from src.config import config
 
 class Kimai(Service):
     def parse_student_activity(self, student: Student) -> bool:
+        student.worked_time = 0
         if student.Kimai_username is None:
             logger.warning(f"Student '{student.name}' does not have Kimai username.")
             return True

@@ -12,11 +12,12 @@ conn: Optional[Connection] = None
 
 def connect_db():
     logger.info("Connect to database")
-    try:
-        engine.connect()
-    except exc.OperationalError:
-        logger.critical("Failed to connect to database: Connection refused")
-        exit()
+    # try:
+    #     engine.connect()
+    # except exc.OperationalError:
+    #     logger.critical("Failed to connect to database: Connection refused")
+    #     exit()
+    engine.connect()
 
     logger.info("Create schema")
     Base.metadata.create_all(engine)

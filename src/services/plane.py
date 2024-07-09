@@ -13,6 +13,7 @@ issue_states = {
 
 class Plane(Service):
     def parse_student_activity(self, student: Student):
+        student.active_tasks = [""]
         if student.Plane_workspace is None:
             logger.warning(f"Student '{student.name}' does not have Plane workspace.")
             return True
@@ -53,7 +54,7 @@ class Plane(Service):
                 if issue_states[issue["state"]] == "in progress":
                     active_issues.append(issue["name"])  # save all issues with status 'in progress'
 
-            active_issues = active_issues.sort()  # issues are sorted by alphabetic orger
+            active_issues.sort()  # issues are sorted by alphabetic orger
             student.active_tasks = active_issues
 
             return True

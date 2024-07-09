@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import List
 from dataclasses import dataclass
 
@@ -7,10 +9,10 @@ class Student:
     id: int
     name: str
 
-    GitLab_username: str
-    Kimai_username: str
-    Plane_workspace: str
-    Bookstack_username: str
+    GitLab_username: str | None
+    Kimai_username: str | None
+    Plane_workspace: str | None
+    Bookstack_username: str | None
 
     commits_count: int
     worked_time: int  # in minutes

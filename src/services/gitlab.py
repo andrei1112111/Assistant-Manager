@@ -9,6 +9,7 @@ from src.config import config
 
 class GitLab(Service):
     def parse_student_activity(self, student: Student) -> bool:
+        student.commits_count = 0
         if student.GitLab_username is None:
             logger.warning(f"Student '{student.name}' does not have Gitlab username.")
             return True

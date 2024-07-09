@@ -9,6 +9,7 @@ from src.logger import logger
 def put_logs_to_db(students: List[Student]):
     for student in students:
         log = LogDB(
+
             student_id=student.id,
             plane_tasks=', '.join(student.active_tasks),
             count_gitlab_commits=student.commits_count,

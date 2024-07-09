@@ -2,4 +2,5 @@ from sqlalchemy.orm import sessionmaker
 
 from .db import engine
 
-bd_session = sessionmaker(bind=engine)
+Session = sessionmaker(bind=engine)
+bd_session = Session()

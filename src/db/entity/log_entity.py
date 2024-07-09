@@ -9,9 +9,9 @@ class LogDB(Base):
     __tablename__ = "logbook"
 
     id = Column(
-        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
+        UUID(as_uuid=True), primary_key=True, default=func.gen_random_uuid()
     )
-    student_id = Column(INTEGER)
+    student_id = Column(UUID(as_uuid=True))
     date = Column(DATE, default=datetime.now, onupdate=datetime.now)
     plane_tasks = Column(TEXT)
     count_gitlab_commits = Column(INTEGER)
