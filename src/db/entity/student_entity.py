@@ -1,4 +1,4 @@
-from sqlalchemy import Column, UUID, BOOLEAN, VARCHAR, func, INTEGER
+from sqlalchemy import Column, UUID, BOOLEAN, func, INTEGER, TEXT
 from sqlalchemy.dialects.postgresql import JSON
 
 from .base_entity import Base
@@ -10,8 +10,8 @@ class StudentDB(Base):
     id = Column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid()
     )
-    name = Column(VARCHAR(100))
-    surname = Column(VARCHAR(100))
+    name = Column(TEXT)
+    surname = Column(TEXT)
     logins = Column(JSON)
     is_active = Column(BOOLEAN)
     project_id = Column(INTEGER)

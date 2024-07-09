@@ -6,6 +6,7 @@ scheduler = BlockingScheduler()
 
 def start_scheduler(func):
     schedule_time = config.time.schedule_time.split(':')  # [hour, minute]
+    #  len(schedule_time) == 2 since config.time.schedule_time been validated by load_config
 
     scheduler.add_job(
         func,

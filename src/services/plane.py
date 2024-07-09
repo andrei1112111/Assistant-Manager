@@ -1,6 +1,6 @@
 from .models import Service, Student
 from .get_request import get_request
-from src.logger import warning
+from src.logger import logger
 
 issue_states = {
     "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",
@@ -14,7 +14,7 @@ issue_states = {
 class Plane(Service):
     def parse_student_activity(self, student: Student):
         if student.Plane_workspace is None:
-            warning(f"Student '{student.name}' does not have Plane workspace.")
+            logger.warning(f"Student '{student.name}' does not have Plane workspace.")
             return True
 
         projects = get_request(  # get projects in workspace
@@ -29,7 +29,7 @@ class Plane(Service):
             return False  # failed to connect
 
         if projects.status_code != 200:
-            warning(f"Failed to find user's ({student.name}) workspace '{student.Plane_workspace}' on Plane!")
+            logger.warning(f"Failed to find user's ({student.name}) workspace '{student.Plane_workspace}' on Plane!")
             return True
 
         projects = projects.json()["results"]
@@ -44,8 +44,8 @@ class Plane(Service):
             )
 
             if issues.status_code != 200:
-                warning(f"Plane error receiving information about student's '{student.name}'"
-                        f" '{student.Plane_workspace}': '{issues.json()['detail']}' !")
+                logger.warning(f"Plane error receiving information about student's '{student.name}'"
+                               f" '{student.Plane_workspace}': '{issues.json()['detail']}' !")
                 return True
 
             active_issues = []

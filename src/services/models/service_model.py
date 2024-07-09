@@ -1,4 +1,4 @@
-from src.logger import info
+from src.logger import logger
 from .student_model import Student
 
 
@@ -24,7 +24,7 @@ class Service:
 
         put_logs_to_db(students)
 
-        info(f"Statistics about students on {self.__name__} successfully loaded.")
+        logger.info(f"Statistics about students on {self.__name__} successfully loaded.")
 
     def parse_student_activity(self, student: Student) -> bool:
         pass

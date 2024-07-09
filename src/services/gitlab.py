@@ -1,7 +1,7 @@
 from .models import Service
 from .models.service_model import Student
 from .get_request import get_request
-from src.logger import warning
+from src.logger import logger
 import datetime
 from pytz import timezone
 from src.config import config
@@ -10,7 +10,7 @@ from src.config import config
 class GitLab(Service):
     def parse_student_activity(self, student: Student) -> bool:
         if student.GitLab_username is None:
-            warning(f"Student '{student.name}' does not have Gitlab username.")
+            logger.warning(f"Student '{student.name}' does not have Gitlab username.")
             return True
 
         yesterday_date = datetime.datetime.now(tz=timezone(config.time.timezone)) - datetime.timedelta(1)  # yesterday
@@ -35,7 +35,7 @@ class GitLab(Service):
         if student_commits.status_code == 200:  # 'OK' statis code
             student.commits_count = len(student_commits.json())  # set commits count
         else:
-            warning(f"For student '{student.name}' with Gitlab username '{student.GitLab_username}'"
-                    f" an error has occurred: '{student_commits.json()['message']}'.")
+            logger.warning(f"For student '{student.name}' with Gitlab username '{student.GitLab_username}'"
+                           f" an error has occurred: '{student_commits.json()['message']}'.")
 
         return True

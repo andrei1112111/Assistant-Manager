@@ -1,7 +1,7 @@
 from .models import Service
 from .models.service_model import Student
 from .get_request import get_request
-from src.logger import warning
+from src.logger import logger
 import datetime
 from pytz import timezone
 from src.config import config
@@ -10,7 +10,7 @@ from src.config import config
 class BookStack(Service):
     def parse_student_activity(self, student: Student) -> bool:
         if student.Bookstack_username is None:
-            warning(f"Student '{student.name}' does not have Bookstack username.")
+            logger.warning(f"Student '{student.name}' does not have Bookstack username.")
             return True
 
         current_date = datetime.datetime.now(
@@ -32,8 +32,8 @@ class BookStack(Service):
             return False  # failed to connect
 
         if user_id.json()["total"] == 0:  # such users are not founded
-            warning(f"The user '{student.name}' is not registered in the Bookstack"
-                    f" or has a different username from the specified one! ")
+            logger.warning(f"The user '{student.name}' is not registered in the Bookstack"
+                           f" or has a different username from the specified one! ")
             return True
 
         audit = get_request(  # get changes-log for student.Bookstack_username-id created today

@@ -1,5 +1,5 @@
 import os
-import src.logger as logger
+from src.logger import logger
 from dotenv import load_dotenv
 from pydantic import ValidationError
 

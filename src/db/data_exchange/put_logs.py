@@ -3,7 +3,7 @@ from typing import List
 from ..session import bd_session
 from ..entity.log_entity import LogDB
 from src.services.models.service_model import Student
-from src.logger import info
+from src.logger import logger
 
 
 def put_logs_to_db(students: List[Student]):
@@ -19,4 +19,4 @@ def put_logs_to_db(students: List[Student]):
 
     bd_session.commit()
 
-    info("Information about students has been uploaded successfully")
+    logger.info("Information about students has been uploaded successfully")

@@ -1,6 +1,6 @@
 from .models import Service, Student
 from .get_request import get_request
-from src.logger import error, warning
+from src.logger import logger
 import datetime
 from pytz import timezone
 from src.config import config
@@ -9,7 +9,7 @@ from src.config import config
 class Kimai(Service):
     def parse_student_activity(self, student: Student) -> bool:
         if student.Kimai_username is None:
-            warning(f"Student '{student.name}' does not have Kimai username.")
+            logger.warning(f"Student '{student.name}' does not have Kimai username.")
             return True
 
         users = get_request(  # get all users
@@ -27,9 +27,9 @@ class Kimai(Service):
 
         if users.status_code != 200:
             if "message" in users.json().keys():
-                error(f"Kimai (when get users) returns an error: '{users.json()['message']}' !")
+                logger.error(f"Kimai (when get users) returns an error: '{users.json()['message']}' !")
             else:
-                error(f"Kimai (when get users) return NOTHING! Maybe this is an authorization error !")  # \
+                logger.error(f"Kimai (when get users) return NOTHING! Maybe this is an authorization error !")
             return False  # failed to use api
 
         users = users.json()
@@ -43,8 +43,8 @@ class Kimai(Service):
         ]
 
         if len(users_with_same_name) == 0:  # Kimai does not even know such a user
-            warning(f"The user '{student.name}' is not registered in the Kimai"
-                    f" or has a different username from the specified one! ")
+            logger.warning(f"The user '{student.name}' is not registered in the Kimai"
+                           f" or has a different username from the specified one! ")
             return True
 
         user_id = users_with_same_name[0]  # there is probably only one such user
@@ -62,9 +62,10 @@ class Kimai(Service):
 
         if timesheets.status_code != 200:
             if "message" in timesheets.json().keys():
-                warning(f"An error occurred while receiving the timesheets on Kimai: '{timesheets.json()['message']}'")
+                logger.warning(f"An error occurred while receiving"
+                               f" the timesheets on Kimai: '{timesheets.json()['message']}'")
             else:
-                warning(f"Kimai api return's nothing when timesheets are requested.")
+                logger.warning(f"Kimai api return's nothing when timesheets are requested.")
             return True
 
         student.worked_time = sum(  # set sum of timesheets duration

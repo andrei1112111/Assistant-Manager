@@ -1,10 +1,10 @@
-import logging
+from src.logger import logger
 
 from sqlalchemy import create_engine
 
 from src.config import config
 
-logging.getLogger("sqlalchemy.engine.Engine.engine")
+logger.getLogger("sqlalchemy.engine.Engine.engine")
 engine = create_engine(
     "postgresql+psycopg2://{}:{}@{}:{}/{}".format(
         config.postgres.user,

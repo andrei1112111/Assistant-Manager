@@ -3,7 +3,7 @@ from typing import List
 from ..session import bd_session
 from ..entity.student_entity import StudentDB
 from src.services.models.student_model import Student
-from src.logger import info
+from src.logger import logger
 
 
 def get_students_from_db() -> List[Student]:
@@ -29,6 +29,6 @@ def get_students_from_db() -> List[Student]:
             )
         )
 
-    info("Information about students has been received successfully")
+    logger.info("Information about students has been received successfully")
 
     return students
