@@ -1,7 +1,7 @@
-import os
-from src.logger import logger
 from dotenv import load_dotenv
-from pydantic import ValidationError
+import datetime
+import pytz
+import os
 
 from .config_models import ConfigModel
 
@@ -10,11 +10,9 @@ def load_config() -> ConfigModel:
     load_dotenv()  # load variables from .env
 
     config_data: dict = {
-        "time": {
-            "timezone": os.getenv("TIMEZONE"),
-            "schedule_time": os.getenv("SCHEDULE_TIME"),
-        },
-        "postgres": {
+        "timezone": pytz.timezone(os.getenv("TIMEZONE")),
+        "schedule_time": datetime.datetime.strptime(os.getenv("SCHEDULE_TIME"), "%H:%M"),
+        "Postgres": {
             "host": os.getenv("POSTGRES_HOST"),
             "port": os.getenv("POSTGRES_PORT"),
             "user": os.getenv("POSTGRES_USER"),
@@ -44,12 +42,6 @@ def load_config() -> ConfigModel:
     }
 
     # Validate config
-    try:
-        config_model = ConfigModel(**config_data)
-    except ValidationError as err_msg:
-        logger.critical(f"Config has not been loaded. An exception: {err_msg}.")
-        exit(6)
+    config_model = ConfigModel(**config_data)
 
-    logger.info("Config successfully loaded.")
-
-    return config_model
+    return config_model  # config successfully loaded

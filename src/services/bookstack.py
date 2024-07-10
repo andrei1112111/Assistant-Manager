@@ -1,23 +1,19 @@
-from .models import Service
-from .models.service_model import Student
+from __future__ import annotations
+
+from src.db.entity import StudentDB, LogDB
+from .base_service import BaseService
 from .get_request import get_request
-from src.logger import logger
-import datetime
-from pytz import timezone
 from src.config import config
+from pytz import timezone
+import datetime
 
 
-class BookStack(Service):
-    def parse_student_activity(self, student: Student) -> bool:
-        student.bookstack_changes = 0
-        if student.Bookstack_username is None:
-            logger.warning(f"Student '{student.name}' does not have Bookstack username.")
-            return True
+class BookStack(BaseService):
+    def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
+        bookstack_username = student.logins.get("bookstack", None)
 
-        current_date = datetime.datetime.now(
-            tz=timezone(config.time.timezone)
-        )  # current date
-        current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
+        if bookstack_username is None:
+            return f"Student '{student.name}' doesn't have Bookstack username."
 
         user_id = get_request(  # get all users with name like student.Bookstack_username
             url=self.url + "/api/users",
@@ -25,17 +21,18 @@ class BookStack(Service):
                 "Authorization": f"Token {self.token}:{self.secret}"
             },
             params={
-                "filter[name:like]": student.Bookstack_username
+                "filter[name:like]": bookstack_username
             }
         )
-
         if user_id is None:
-            return False  # failed to connect
+            return f'Failed to connect to "{self.url + "/api/users"}".'
 
         if user_id.json()["total"] == 0:  # such users are not founded
-            logger.warning(f"The user '{student.name}' is not registered in the Bookstack"
-                           f" or has a different username from the specified one! ")
-            return True
+            return (f"The user '{student.name}' is not registered in the Bookstack"
+                    f" or has a different username from the specified one.")
+
+        current_date = datetime.datetime.now(tz=timezone(config.timezone))  # current date
+        current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         audit = get_request(  # get changes-log for student.Bookstack_username-id created today
             url=self.url + "/api/audit-log",
@@ -47,10 +44,7 @@ class BookStack(Service):
                 "filter[user:eq]": user_id.json()["data"][0]["id"]
             }
         )
-
         if audit is None:
-            return False  # failed to connect
+            return f'Failed to connect to "{self.url + "/api/audit-log"}".'
 
-        student.bookstack_changes = audit.json()["total"]  # set number of changes
-
-        return True
+        log.count_bookstack_changes = audit.json()["total"]  # set number of changes

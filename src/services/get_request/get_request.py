@@ -1,29 +1,38 @@
 from __future__ import annotations
 
-import requests as rq
-from src.logger import logger
-from time import sleep
+from requests.adapters import HTTPAdapter, Retry
 from dataclasses import dataclass
-from .retry_config import def_retry_conf
+import requests as rq
+
+from .retry_config import RetryConfig
 
 
-def get_request(url: str,
-                params: dict,
-                headers: dict,
-                timeout: int = 2,
-                retry_params: dataclass = def_retry_conf) -> rq.Response | None:
-    attempts = 0
+def get_request(
+        url: str,
+        params: dict,
+        headers: dict,
+        timeout_seconds: int = 1,
+        retry_params: dataclass = RetryConfig(
+            max_attempts=5,
+            delay_seconds=1
+        )
+) -> rq.Response | None:
+    """
+    :return: None when failed to connect else response object
+    """
+    with rq.Session() as session:  # the official documentation of requests advises to do like that
+        retries = Retry(
+            total=retry_params.max_attempts,
+            backoff_factor=retry_params.delay_seconds
+        )
+        session.mount('http://', HTTPAdapter(max_retries=retries))
+        session.mount('https://', HTTPAdapter(max_retries=retries))
 
-    while attempts < retry_params.max_attempts:
         try:
-            result = rq.get(
-                url=url, params=params, headers=headers, timeout=timeout
+            resp = session.get(
+                url=url, params=params, headers=headers, timeout=timeout_seconds
             )
+            return resp
 
-            return result
-        except rq.exceptions.ConnectionError as _:
-            attempts += 1
-            sleep(retry_params.delay)
-
-    logger.error(f"Failed to connect to '{url}'.")
-    return None
+        except rq.exceptions.ConnectionError:
+            return

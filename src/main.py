@@ -1,23 +1,34 @@
-from scheduler import start_scheduler
+from services import plane_service, kimai_service, gitlab_service, bookStack_service
+from src.db.repository import students_repository, logbook_repository
 from src.logger import logger
-from services import plane_service, kimai_service, gitlab_service, bookStack_service, config
+from src.db.entity import LogDB
+from src.config import config
+
+from scheduler import start_scheduler
 
 
 def run_app():
     def job():
-        from src.db.data_exchange.get_students import get_students_from_db
-        from src.db.data_exchange.put_logs import put_logs_to_db
+        # get active students from bd
+        students = students_repository.find_all_by_is_active(True)
 
-        students = get_students_from_db()
+        logs = [LogDB()] * len(students)  # empty logs for all students
 
-        gitlab_service.get_info_about_students(students)
-        kimai_service.get_info_about_students(students)
-        plane_service.get_info_about_students(students)
-        bookStack_service.get_info_about_students(students)
+        # for each student and log, set log.student_id = student.id
+        for student, log in zip(students, logs):
+            log.student_id = student.id
 
-        put_logs_to_db(students)
+        # fill logs with activities
+        plane_service.put_students_activity_to_logs(students, logs)
+        kimai_service.put_students_activity_to_logs(students, logs)
+        gitlab_service.put_students_activity_to_logs(students, logs)
+        bookStack_service.put_students_activity_to_logs(students, logs)
 
-    logger.info(f"The scheduler is waiting for {config.time}.")
+        # save all logs
+        logbook_repository.save_all(logs)
+
+    job()
+    logger.info(f"The scheduler is waiting for {config.schedule_time}.")
     start_scheduler(job)
 
 

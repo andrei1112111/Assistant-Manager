@@ -1,20 +1,12 @@
 from __future__ import annotations
-from typing_extensions import Annotated
-from pydantic import BaseModel, AfterValidator
-from .config_validators import *
 
-TimezoneType = Annotated[str, AfterValidator(validate_timezone)]  # annotated type for validation field
-
-Schedule_timeType = Annotated[str, AfterValidator(validate_schedule_time)]  # also annotated type for validation field
-
-
-class TimeConfig(BaseModel):
-    timezone: TimezoneType
-    schedule_time: Schedule_timeType
+from pydantic import BaseModel
+import datetime
+import pytz
 
 
 class ServiceApiConfigModel(BaseModel):
-    url: str
+    url: str  # like 'http://localhost:8080'
     token: str | None
     secret_token: str | None
 
@@ -28,9 +20,13 @@ class PostgresConfigModel(BaseModel):
 
 
 class ConfigModel(BaseModel):
-    time: TimeConfig
-    postgres: PostgresConfigModel
+    timezone: pytz.BaseTzInfo  # like 'Asia/Novosibirsk'
+    schedule_time: datetime.datetime  # like '18:00'
+    Postgres: PostgresConfigModel
     Gitlab: ServiceApiConfigModel
     Kimai: ServiceApiConfigModel
     Plane: ServiceApiConfigModel
     BookStack: ServiceApiConfigModel
+
+    class Config:  # this is necessary to allow pydantic to work with data types from other libraries
+        arbitrary_types_allowed = True

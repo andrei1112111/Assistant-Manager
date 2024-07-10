@@ -1,6 +1,12 @@
-from .models import Service, Student
+from __future__ import annotations
+
+from src.config import config
+from .base_service import BaseService
 from .get_request import get_request
-from src.logger import logger
+from src.db.entity import StudentDB, LogDB
+
+import datetime
+from pytz import timezone
 
 issue_states = {
     "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",
@@ -11,15 +17,15 @@ issue_states = {
 }  # meaning of status codes
 
 
-class Plane(Service):
-    def parse_student_activity(self, student: Student):
-        student.active_tasks = [""]
-        if student.Plane_workspace is None:
-            logger.warning(f"Student '{student.name}' does not have Plane workspace.")
-            return True
+class Plane(BaseService):
+    def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
+        plane_workspace = student.logins.get("plane", None)
+
+        if plane_workspace is None:
+            return f"Student '{student.name}' does not have Plane workspace."
 
         projects = get_request(  # get projects in workspace
-            url=self.url + f"/api/v1/workspaces/{student.Plane_workspace}/projects/",
+            url=self.url + f"/api/v1/workspaces/{plane_workspace}/projects/",
             headers={
                 "x-api-key": self.token
             },
@@ -27,17 +33,16 @@ class Plane(Service):
         )
 
         if projects is None:
-            return False  # failed to connect
+            return f'Failed to connect to "{self.url + f"/api/v1/workspaces/{plane_workspace}/projects/"}".'
 
         if projects.status_code != 200:
-            logger.warning(f"Failed to find user's ({student.name}) workspace '{student.Plane_workspace}' on Plane!")
-            return True
+            return f"Failed to find user's '{student.name}' workspace '{plane_workspace}'."
 
         projects = projects.json()["results"]
 
         for project in projects:
             issues = get_request(  # get all issues in projects
-                url=self.url + f"/api/v1/workspaces/{student.Plane_workspace}/projects/{project['id']}/issues/",
+                url=self.url + f"/api/v1/workspaces/{plane_workspace}/projects/{project['id']}/issues/",
                 headers={
                     "x-api-key": self.token
                 },
@@ -45,9 +50,7 @@ class Plane(Service):
             )
 
             if issues.status_code != 200:
-                logger.warning(f"Plane error receiving information about student's '{student.name}'"
-                               f" '{student.Plane_workspace}': '{issues.json()['detail']}' !")
-                return True
+                return f"For student '{student.name}': {issues.json()['detail']}'."
 
             active_issues = []
             for issue in issues.json()["results"]:
@@ -55,6 +58,4 @@ class Plane(Service):
                     active_issues.append(issue["name"])  # save all issues with status 'in progress'
 
             active_issues.sort()  # issues are sorted by alphabetic orger
-            student.active_tasks = active_issues
-
-            return True
+            log.plane_tasks = ', '.join(active_issues)

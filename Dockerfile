@@ -1,8 +1,9 @@
-FROM ubuntu:latest
+FROM python:3
+# https://hub.docker.com/_/python
 
 WORKDIR /opt/bot
 
-COPY src src
+COPY . .
 
 RUN apt update \
     && apt install -y libpq-dev \
@@ -18,3 +19,5 @@ ENV PATCH_VERSION=0
 ENV LOCALE_DIR=locales
 
 ENTRYPOINT [ "python3", "src/main.py" ]
+
+# cp /opt/bot/.env.local.example /opt/bot/.env

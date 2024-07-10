@@ -1,20 +1,21 @@
 from apscheduler.schedulers.blocking import BlockingScheduler
+
 from src.config import config
 
 scheduler = BlockingScheduler()
 
 
 def start_scheduler(func):
-    schedule_time = config.time.schedule_time.split(':')  # [hour, minute]
-    #  len(schedule_time) == 2 since config.time.schedule_time been validated by load_config
-
+    """
+    Add cron job on every monday-friday days in schedule_time by timezone from config
+    """
     scheduler.add_job(
         func,
         'cron',
         day_of_week='mon-fri',
-        hour=int(schedule_time[0]),
-        minute=int(schedule_time[1]),
-        timezone=config.time.timezone
+        hour=config.schedule_time.hour,
+        minute=config.schedule_time.minute,
+        timezone=config.timezone
     )
 
     scheduler.start()

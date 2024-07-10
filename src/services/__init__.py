@@ -33,6 +33,5 @@ __all__ = [
     "gitlab_service",
     "kimai_service",
     "plane_service",
-    "bookStack_service",
-    "config"
+    "bookStack_service"
 ]

@@ -1,17 +1,20 @@
-from .models import Service, Student
+from __future__ import annotations
+
+from src.config import config
+from .base_service import BaseService
 from .get_request import get_request
-from src.logger import logger
+from src.db.entity import StudentDB, LogDB
+
 import datetime
 from pytz import timezone
-from src.config import config
 
 
-class Kimai(Service):
-    def parse_student_activity(self, student: Student) -> bool:
-        student.worked_time = 0
-        if student.Kimai_username is None:
-            logger.warning(f"Student '{student.name}' does not have Kimai username.")
-            return True
+class Kimai(BaseService):
+    def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
+        kimai_username = student.logins.get("gitlab", None)
+
+        if kimai_username is None:
+            return f"Student '{student.name}' does not have Kimai username."
 
         users = get_request(  # get all users
             url=self.url + f"/api/users",
@@ -24,31 +27,28 @@ class Kimai(Service):
         )
 
         if users is None:
-            return False  # failed to connect
+            return f'Failed to connect to "{self.url + f"/api/users"}".'
 
         if users.status_code != 200:
             if "message" in users.json().keys():
-                logger.error(f"Kimai (when get users) returns an error: '{users.json()['message']}' !")
+                return users.json()['message']
             else:
-                logger.error(f"Kimai (when get users) return NOTHING! Maybe this is an authorization error !")
-            return False  # failed to use api
+                return "Kimai return nothing when users are requested. Maybe this is an authorization error."
 
         users = users.json()
 
-        current_date = datetime.datetime.now(tz=timezone(config.time.timezone))  # current date
-        current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
-
-        # find kimai user_id's by student Kimai_username
+        # get all ids of usernames with the same name
         users_with_same_name = [
-            user["username"] for user in users if user["username"] == student.Kimai_username
+            user["username"] for user in users if user["username"] == kimai_username
         ]
 
-        if len(users_with_same_name) == 0:  # Kimai does not even know such a user
-            logger.warning(f"The user '{student.name}' is not registered in the Kimai"
-                           f" or has a different username from the specified one! ")
-            return True
+        if len(users_with_same_name) == 0:  # we not find users with name = kimai_username
+            return f"The user '{student.name}' is not registered in the Kimai."
 
         user_id = users_with_same_name[0]  # there is probably only one such user
+
+        current_date = datetime.datetime.now(tz=timezone(config.time.timezone))  # current date
+        current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         # get user timesheets
         timesheets = get_request(
@@ -56,23 +56,22 @@ class Kimai(Service):
                 "Authorization": f"Bearer {self.token}"
             }, params={
                 "user": user_id,
-                "begin": f"{current_date}T00:00:00",  # by server time
+                "begin": f"{current_date}T00:00:00",
                 "end": f"{current_date}T23:59:59"
             }
         )
 
         if timesheets.status_code != 200:
             if "message" in timesheets.json().keys():
-                logger.warning(f"An error occurred while receiving"
-                               f" the timesheets on Kimai: '{timesheets.json()['message']}'")
+                return f"{timesheets.json()['message']}"
             else:
-                logger.warning(f"Kimai api return's nothing when timesheets are requested.")
-            return True
+                return f"Kimai api return nothing when timesheets are requested."
 
-        student.worked_time = sum(  # set sum of timesheets duration
-            [
-                timesheet["duration"] for timesheet in timesheets.json()
-            ]
+        log.count_kimai_hours = round(
+            sum(  # sum duration of timesheets
+                [
+                    timesheet["duration"] for timesheet in timesheets.json()
+                ]
+            ) / 60,  # in hours
+            3  # rounded to three decimal places (for ex. 61 minutes = 1.017 hours)
         )
-
-        return True

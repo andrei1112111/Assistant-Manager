@@ -1,19 +1,44 @@
-from sqlalchemy import Column, UUID, func, INTEGER, DATE, TEXT
+from sqlalchemy import Column, UUID, INTEGER, DATE, TEXT, FLOAT
+from datetime import datetime
+from pytz import timezone
 
 from .base_entity import Base
+from src.config import config
 
-from datetime import datetime
+
+def now_in_timezone():
+    """
+    Now time in timezone from config
+    """
+    return datetime.now(
+        tz=timezone(config.time.timezone)
+    )
 
 
 class LogDB(Base):
     __tablename__ = "logbook"
 
     id = Column(
-        UUID(as_uuid=True), primary_key=True, default=func.gen_random_uuid()
+        INTEGER, primary_key=True, autoincrement=True
     )
-    student_id = Column(UUID(as_uuid=True))
-    date = Column(DATE, default=datetime.now, onupdate=datetime.now)
-    plane_tasks = Column(TEXT)
-    count_gitlab_commits = Column(INTEGER)
-    count_bookstack_changes = Column(INTEGER)
-    count_kimai_hours = Column(INTEGER)
+    student_id = Column(
+        UUID(as_uuid=True)
+    )
+    date = Column(
+        DATE, default=now_in_timezone, onupdate=now_in_timezone
+    )
+    plane_tasks = Column(
+        TEXT, default=""
+    )
+    count_gitlab_commits = Column(
+        INTEGER, default=0
+    )
+    count_bookstack_changes = Column(
+        INTEGER, default=0
+    )
+    count_kimai_hours = Column(
+        FLOAT, default=0
+    )
+    fail_reasons = Column(
+        TEXT, default=""
+    )
