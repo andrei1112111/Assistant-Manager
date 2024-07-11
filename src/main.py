@@ -9,23 +9,30 @@ from scheduler import start_scheduler
 
 def run_app():
     def job():
-        # get active students from bd
-        students = students_repository.find_all_by_is_active(True)
+        # get package of active students from bd
+        students = students_repository.get_package_by_is_active(True)
 
-        logs = [LogDB() for _ in range(len(students))]  # empty logs for all students
+        while students:  # while package is not empty
+            logs = [LogDB() for _ in range(len(students))]  # empty logs for students (one log for one student)
 
-        # for each student and log, set log.student_id = student.id
-        for student, log in zip(students, logs):
-            log.student_id = student.id
+            # for each student and log, set log.student_id = student.id
+            for student, log in zip(students, logs):
+                log.student_id = student.id
 
-        # fill logs with activities
-        plane_service.put_students_activity_to_logs(students, logs)
-        kimai_service.put_students_activity_to_logs(students, logs)
-        gitlab_service.put_students_activity_to_logs(students, logs)
-        bookStack_service.put_students_activity_to_logs(students, logs)
+            # fill logs with activities
+            plane_service.put_students_activity_to_logs(students, logs)
+            kimai_service.put_students_activity_to_logs(students, logs)
+            gitlab_service.put_students_activity_to_logs(students, logs)
+            bookStack_service.put_students_activity_to_logs(students, logs)
 
-        # save all logs
-        logbook_repository.save_all(logs)
+            # push logs to db
+            logbook_repository.save_all(logs)
+
+            # get next package of students
+            students = students_repository.get_package_by_is_active(True)
+
+        # when the packages are over, reset the offset for correct further getting students
+        students_repository.clear_offset()
 
     job()
     logger.info(f"The scheduler is waiting for {config.schedule_time}.")

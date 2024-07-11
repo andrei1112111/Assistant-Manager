@@ -22,6 +22,10 @@ class PostgresConfigModel(BaseModel):
 class ConfigModel(BaseModel):
     timezone: pytz.BaseTzInfo  # like 'Asia/Novosibirsk'
     schedule_time: datetime.datetime  # like '18:00'
+
+    # All students will be processed in parts of package_of_students_size
+    package_of_students_size: int  # the number of students processed at one part.
+
     Postgres: PostgresConfigModel
     Gitlab: ServiceApiConfigModel
     Kimai: ServiceApiConfigModel
