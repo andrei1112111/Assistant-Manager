@@ -21,6 +21,9 @@ class BaseService:
             fail_reason = self.fill_student_activity(student, log)
 
             if fail_reason:
+                if log.fail_reasons is None:
+                    log.fail_reasons = ""
+
                 # add fail_reason to log.fail_reasons
                 log.fail_reasons += f"|{self.__class__.__name__}: {fail_reason}|"
                 logger.warning(f"{self.__class__.__name__}: {fail_reason}")

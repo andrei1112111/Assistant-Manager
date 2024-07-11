@@ -16,10 +16,10 @@ class GitLab(BaseService):
         if gitlab_username is None:
             return f"Student '{student.name}' does not have Gitlab username."
 
-        yesterday_date = datetime.datetime.now(tz=timezone(config.time.timezone)) - datetime.timedelta(1)  # yesterday
+        yesterday_date = datetime.datetime.now(tz=timezone(str(config.timezone))) - datetime.timedelta(1)  # yesterday
         yesterday_date = yesterday_date.strftime("%Y-%m-%d")
 
-        tomorrow_date = datetime.datetime.now(tz=timezone(config.time.timezone)) + datetime.timedelta(1)  # tomorrow
+        tomorrow_date = datetime.datetime.now(tz=timezone(str(config.timezone))) + datetime.timedelta(1)  # tomorrow
         tomorrow_date = tomorrow_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         student_commits = get_request(  # get all commits by student.GitLab_username created today
@@ -37,4 +37,5 @@ class GitLab(BaseService):
         if student_commits.status_code == 200:  # 'OK' statis code
             log.count_gitlab_commits = len(student_commits.json())  # set commits count
         else:
+            print(student_commits.content)
             return student_commits.json()['message']

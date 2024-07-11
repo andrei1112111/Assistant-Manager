@@ -31,7 +31,7 @@ class BookStack(BaseService):
             return (f"The user '{student.name}' is not registered in the Bookstack"
                     f" or has a different username from the specified one.")
 
-        current_date = datetime.datetime.now(tz=timezone(config.timezone))  # current date
+        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         audit = get_request(  # get changes-log for student.Bookstack_username-id created today

@@ -12,7 +12,7 @@ def run_app():
         # get active students from bd
         students = students_repository.find_all_by_is_active(True)
 
-        logs = [LogDB()] * len(students)  # empty logs for all students
+        logs = [LogDB() for _ in range(len(students))]  # empty logs for all students
 
         # for each student and log, set log.student_id = student.id
         for student, log in zip(students, logs):

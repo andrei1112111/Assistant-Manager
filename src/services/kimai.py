@@ -47,7 +47,7 @@ class Kimai(BaseService):
 
         user_id = users_with_same_name[0]  # there is probably only one such user
 
-        current_date = datetime.datetime.now(tz=timezone(config.time.timezone))  # current date
+        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         # get user timesheets

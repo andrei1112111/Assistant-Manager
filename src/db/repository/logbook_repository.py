@@ -15,5 +15,4 @@ class LogbookRepository:
         """
         for log in logs:
             self.session.add(log)
-
         self.session.commit()

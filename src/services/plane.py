@@ -1,12 +1,9 @@
 from __future__ import annotations
 
-from src.config import config
 from .base_service import BaseService
 from .get_request import get_request
 from src.db.entity import StudentDB, LogDB
 
-import datetime
-from pytz import timezone
 
 issue_states = {
     "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",

@@ -13,7 +13,7 @@ def get_request(
         headers: dict,
         timeout_seconds: int = 1,
         retry_params: dataclass = RetryConfig(
-            max_attempts=5,
+            max_attempts=2,
             delay_seconds=1
         )
 ) -> rq.Response | None:

@@ -1,4 +1,4 @@
-from sqlalchemy import Column, UUID, INTEGER, DATE, TEXT, FLOAT
+from sqlalchemy import Column, UUID, INTEGER, DATE, TEXT, FLOAT, func
 from datetime import datetime
 from pytz import timezone
 
@@ -11,15 +11,18 @@ def now_in_timezone():
     Now time in timezone from config
     """
     return datetime.now(
-        tz=timezone(config.time.timezone)
+        tz=timezone(str(config.timezone))
     )
 
 
 class LogDB(Base):
     __tablename__ = "logbook"
 
+    # id = Column(
+    #     INTEGER, primary_key=True, autoincrement='auto', unique=True, default=0
+    # )
     id = Column(
-        INTEGER, primary_key=True, autoincrement=True
+        UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid(), default=func.gen_random_uuid()
     )
     student_id = Column(
         UUID(as_uuid=True)
