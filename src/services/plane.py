@@ -6,7 +6,6 @@ from src.db.entity import StudentDB, LogDB
 
 import requests
 
-
 issue_states = {
     "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",
     "0cba5ea3-e5c1-47be-bdf8-1142a2f44b40": "in progress",
@@ -17,11 +16,11 @@ issue_states = {
 
 
 class Plane(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
+    def fill_student_activity(self, student: StudentDB, log: LogDB):
         plane_workspace = student.logins.get("plane", None)
 
         if plane_workspace is None:
-            return f"Student '{student.name}' does not have Plane workspace."
+            raise Exception(f"Student '{student.name}' does not have Plane workspace.")
 
         projects = get_request(  # get projects in workspace
             url=self.url + f"/api/v1/workspaces/{plane_workspace}/projects/",
@@ -32,10 +31,11 @@ class Plane(BaseService):
         )
 
         if projects is None:
-            return f'Failed to connect to "{self.url + f"/api/v1/workspaces/{plane_workspace}/projects/"}".'
+            raise ConnectionError(f'Failed to connect to'
+                                  f' "{self.url + f"/api/v1/workspaces/{plane_workspace}/projects/"}".')
 
         if projects.status_code != requests.codes.ok:
-            return f"Failed to find user's '{student.name}' workspace '{plane_workspace}'."
+            raise Exception(f"Failed to find user's '{student.name}' workspace '{plane_workspace}'.")
 
         projects = projects.json()["results"]
 
@@ -48,8 +48,14 @@ class Plane(BaseService):
                 params={}
             )
 
+            if projects is None:
+                raise ConnectionError(
+                    f'Failed to connect to'
+                    f' self.url + f"/api/v1/workspaces/{plane_workspace}/projects/{project["id"]}/issues/".'
+                )
+
             if issues.status_code != requests.codes.ok:
-                return f"For student '{student.name}': {issues.json()['detail']}'."
+                raise Exception(f"For student '{student.name}': {issues.json()['detail']}'.")
 
             active_issues = []
             for issue in issues.json()["results"]:

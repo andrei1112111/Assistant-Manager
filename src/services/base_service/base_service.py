@@ -11,29 +11,30 @@ class BaseService:
         self.token: str = token
         self.secret: str = secret
 
-    def put_students_activity_to_logs(self, students: List[StudentDB], logs: List[LogDB]):
+    def put_students_activity_to_logs(self, students: List[StudentDB], logMap: dict[LogDB]):
         """
         For each student and log fill log column appropriate service.
         Add fail_reason when it fails with fill student activity
         """
         # for each student and log
-        for student, log in zip(students, logs):
-            fail_reason = self.fill_student_activity(student, log)
+        for student in students:
+            try:
+                self.fill_student_activity(student, logMap[student.id])
 
-            if fail_reason:
-                if log.fail_reasons is None:
-                    log.fail_reasons = ""
+            except Exception as fail_reason:
+                if logMap[student.id].fail_reasons is None:
+                    logMap[student.id].fail_reasons = ""
 
                 # add fail_reason to log.fail_reasons
-                log.fail_reasons += f"|{self.__class__.__name__}: {fail_reason}|"
+                logMap[student.id].fail_reasons += f"|{self.__class__.__name__}: {fail_reason}|"
                 logger.warning(f"{self.__class__.__name__}: {fail_reason}")
 
-                if "Failed to connect" in fail_reason:
-                    return  # stop parsing if there is no connection to the server
+                # if fail_reason == ConnectionError:
+                #     return  # stop parsing if there is no connection to the server
 
-    def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
+    def fill_student_activity(self, student: StudentDB, log: LogDB):
         """
         Accesses the api to get data about user activity on the service.
-        In case of an error, it returns it as string else None.
+        In case of an error, function raise it.
         """
         pass

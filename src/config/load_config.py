@@ -12,7 +12,7 @@ def load_config() -> ConfigModel:
     config_data: dict = {
         "timezone": pytz.timezone(os.getenv("TIMEZONE")),
         "schedule_time": datetime.datetime.strptime(os.getenv("SCHEDULE_TIME"), "%H:%M"),
-        "package_of_students_size": os.getenv("PROCESSING_POCKET_SIZE"),
+        "package_of_students_size": int(os.getenv("PROCESSING_POCKET_SIZE")),
         "Postgres": {
             "host": os.getenv("POSTGRES_HOST"),
             "port": os.getenv("POSTGRES_PORT"),

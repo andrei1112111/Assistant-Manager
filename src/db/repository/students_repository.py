@@ -13,7 +13,7 @@ class StudentRepository:
         """
         get users with is_active = True
         """
-        query = self.session.query(StudentDB).filter(StudentDB.is_active is True)
+        query = self.session.query(StudentDB).filter(StudentDB.is_active == True)
 
         query = query.offset(offset)
         query = query.limit(limit)

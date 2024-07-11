@@ -11,11 +11,11 @@ import requests
 
 
 class GitLab(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
+    def fill_student_activity(self, student: StudentDB, log: LogDB):
         gitlab_username = student.logins.get("gitlab", None)
 
         if gitlab_username is None:
-            return f"Student '{student.name}' does not have Gitlab username."
+            raise Exception(f"Student '{student.name}' does not have Gitlab username.")
 
         yesterday_date = datetime.datetime.now(tz=timezone(str(config.timezone))) - datetime.timedelta(1)  # yesterday
         yesterday_date = yesterday_date.strftime("%Y-%m-%d")
@@ -33,9 +33,9 @@ class GitLab(BaseService):
             headers={}
         )
         if student_commits is None:
-            return f'Failed to connect to "{self.url + f"/api/v4/users/{gitlab_username}/events"}".'
+            raise ConnectionError(f'Failed to connect to "{self.url + f"/api/v4/users/{gitlab_username}/events"}".')
 
         if student_commits.status_code == requests.codes.ok:
             log.count_gitlab_commits = len(student_commits.json())  # set commits count
         else:
-            return student_commits.json()['message']
+            raise Exception(student_commits.json()['message'])

@@ -11,11 +11,11 @@ import requests
 
 
 class Kimai(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
+    def fill_student_activity(self, student: StudentDB, log: LogDB):
         kimai_username = student.logins.get("gitlab", None)
 
         if kimai_username is None:
-            return f"Student '{student.name}' does not have Kimai username."
+            raise Exception(f"Student '{student.name}' does not have Kimai username.")
 
         users = get_request(  # get all users
             url=self.url + f"/api/users",
@@ -28,13 +28,14 @@ class Kimai(BaseService):
         )
 
         if users is None:
-            return f'Failed to connect to "{self.url + f"/api/users"}".'
+            raise ConnectionError(f'Failed to connect to "{self.url + f"/api/users"}".')
 
         if users.status_code != requests.codes.ok:
             if "message" in users.json().keys():
-                return users.json()['message']
+                raise Exception(users.json()['message'])
             else:
-                return "Kimai return nothing when users are requested. Maybe this is an authorization error."
+                raise Exception("Kimai return nothing when users are requested."
+                                " Maybe this is an authorization error.")
 
         users = users.json()
 
@@ -44,7 +45,7 @@ class Kimai(BaseService):
         ]
 
         if len(users_with_same_name) == 0:  # we not find users with name = kimai_username
-            return f"The user '{student.name}' is not registered in the Kimai."
+            raise Exception(f"The user '{student.name}' is not registered in the Kimai.")
 
         user_id = users_with_same_name[0]  # there is probably only one such user
 
@@ -62,11 +63,14 @@ class Kimai(BaseService):
             }
         )
 
+        if timesheets is None:
+            raise ConnectionError(f'Failed to connect to "{self.url + f"/api/timesheets"}".')
+
         if timesheets.status_code != requests.codes.ok:
             if "message" in timesheets.json().keys():
-                return f"{timesheets.json()['message']}"
+                raise Exception(f"{timesheets.json()['message']}")
             else:
-                return f"Kimai api return nothing when timesheets are requested."
+                raise Exception(f"Kimai api return nothing when timesheets are requested.")
 
         log.count_kimai_hours = round(
             sum(  # sum duration of timesheets

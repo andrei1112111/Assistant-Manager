@@ -11,33 +11,36 @@ def run_app():
     def job():
         offset = 0
 
-        # get package of active students from bd
-        students = students_repository.get_active_user(limit=config.package_of_students_size, offset=offset)
-
-        while students:  # while package is not empty
-            logs = [LogDB() for _ in range(len(students))]  # empty logs for students (one log for one student)
-
-            # for each student and log, set log.student_id = student.id
-            for student, log in zip(students, logs):
-                log.student_id = student.id
-
-            # fill logs with activities
-            plane_service.put_students_activity_to_logs(students, logs)
-            kimai_service.put_students_activity_to_logs(students, logs)
-            gitlab_service.put_students_activity_to_logs(students, logs)
-            bookStack_service.put_students_activity_to_logs(students, logs)
-
-            # push logs to db
-            action_log_repository.save_all(logs)
-
-            # get next package of students
-            offset += config.package_of_students_size
+        while True:  # while package is not empty
+            # get package of active students from bd
             students = students_repository.get_active_user(limit=config.package_of_students_size, offset=offset)
 
-        # when the packages are over, reset the offset for correct further getting students
-        students_repository.clear_offset()
+            if len(students) == 0:  # There are no more students in the database
+                logger.info("All students have been successfully processed")
+                break
 
-    logger.info(f"The scheduler is waiting for {config.schedule_time.hour}:{config.schedule_time.minute}.")
+            logMap = dict()
+            for student in students:  # empty logs for students (one log for one student)
+                logMap[student.id] = LogDB(student_id=student.id)
+
+            # fill logs with activities
+            plane_service.put_students_activity_to_logs(students, logMap)
+            kimai_service.put_students_activity_to_logs(students, logMap)
+            gitlab_service.put_students_activity_to_logs(students, logMap)
+            bookStack_service.put_students_activity_to_logs(students, logMap)
+
+            # push logs to db
+            action_log_repository.save_all(
+                logMap.values()
+            )
+
+            # shift offset to get the next package
+            offset += config.package_of_students_size
+
+    job()
+
+    logger.info(f"The scheduler is waiting for "
+                f"{str(config.schedule_time.hour).zfill(2)}:{str(config.schedule_time.minute).zfill(2)}.")
     start_scheduler(job)
 
 

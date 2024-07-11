@@ -34,17 +34,17 @@ class LogDB(Base):
         DATE, default=now_in_timezone, onupdate=now_in_timezone
     )
     plane_tasks = Column(
-        TEXT, default=""
+        TEXT, default=None
     )
     count_gitlab_commits = Column(
-        INTEGER, default=0
+        INTEGER, default=None
     )
     count_bookstack_changes = Column(
-        INTEGER, default=0
+        INTEGER, default=None
     )
     count_kimai_hours = Column(
-        FLOAT, default=0
+        FLOAT, default=None
     )
     fail_reasons = Column(
-        TEXT, default=""
+        TEXT, default=None
     )
