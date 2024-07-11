@@ -34,7 +34,7 @@ def run_app():
         # when the packages are over, reset the offset for correct further getting students
         students_repository.clear_offset()
 
-    logger.info(f"The scheduler is waiting for {config.schedule_time}.")
+    logger.info(f"The scheduler is waiting for {config.schedule_time.hour}:{config.schedule_time.minute}.")
     start_scheduler(job)
 
 
