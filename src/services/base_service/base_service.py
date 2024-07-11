@@ -28,6 +28,9 @@ class BaseService:
                 log.fail_reasons += f"|{self.__class__.__name__}: {fail_reason}|"
                 logger.warning(f"{self.__class__.__name__}: {fail_reason}")
 
+                if "Failed to connect" in fail_reason:
+                    return  # stop parsing if there is no connection to the server
+
     def fill_student_activity(self, student: StudentDB, log: LogDB) -> str | None:
         """
         Accesses the api to get data about user activity on the service.

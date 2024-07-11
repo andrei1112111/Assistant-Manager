@@ -21,6 +21,9 @@ class LogDB(Base):
     # id = Column(
     #     INTEGER, primary_key=True, autoincrement='auto', unique=True, default=0
     # )
+    # student_id = Column(
+    #     INTEGER
+    # )
     id = Column(
         UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid(), default=func.gen_random_uuid()
     )
