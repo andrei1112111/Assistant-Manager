@@ -5,7 +5,7 @@ from sqlalchemy.orm import Session
 from src.db.entity import LogDB
 
 
-class LogbookRepository:
+class ActionLogRepository:
     def __init__(self, session: Session):
         self.session = session
 

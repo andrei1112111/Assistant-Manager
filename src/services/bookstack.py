@@ -6,6 +6,7 @@ from .get_request import get_request
 from src.config import config
 from pytz import timezone
 import datetime
+import requests
 
 
 class BookStack(BaseService):
@@ -27,6 +28,9 @@ class BookStack(BaseService):
         if user_id is None:
             return f'Failed to connect to "{self.url + "/api/users"}".'
 
+        if user_id.status_code != requests.codes.ok:
+            return f'Failed to get by api "{self.url + "/api/users"}" with status code {user_id.status_code}.'
+
         if user_id.json()["total"] == 0:  # such users are not founded
             return (f"The user '{student.name}' is not registered in the Bookstack"
                     f" or has a different username from the specified one.")
@@ -46,5 +50,8 @@ class BookStack(BaseService):
         )
         if audit is None:
             return f'Failed to connect to "{self.url + "/api/audit-log"}".'
+
+        if audit.status_code != requests.codes.ok:
+            return f'Failed to get by api "{self.url + "/api/audit-log"}" with status code {audit.status_code}.'
 
         log.count_bookstack_changes = audit.json()["total"]  # set number of changes

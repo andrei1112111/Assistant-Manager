@@ -4,6 +4,8 @@ from .base_service import BaseService
 from .get_request import get_request
 from src.db.entity import StudentDB, LogDB
 
+import requests
+
 
 issue_states = {
     "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",
@@ -32,7 +34,7 @@ class Plane(BaseService):
         if projects is None:
             return f'Failed to connect to "{self.url + f"/api/v1/workspaces/{plane_workspace}/projects/"}".'
 
-        if projects.status_code != 200:
+        if projects.status_code != requests.codes.ok:
             return f"Failed to find user's '{student.name}' workspace '{plane_workspace}'."
 
         projects = projects.json()["results"]
@@ -46,7 +48,7 @@ class Plane(BaseService):
                 params={}
             )
 
-            if issues.status_code != 200:
+            if issues.status_code != requests.codes.ok:
                 return f"For student '{student.name}': {issues.json()['detail']}'."
 
             active_issues = []

@@ -7,6 +7,7 @@ from src.db.entity import StudentDB, LogDB
 
 import datetime
 from pytz import timezone
+import requests
 
 
 class GitLab(BaseService):
@@ -34,8 +35,7 @@ class GitLab(BaseService):
         if student_commits is None:
             return f'Failed to connect to "{self.url + f"/api/v4/users/{gitlab_username}/events"}".'
 
-        if student_commits.status_code == 200:  # 'OK' statis code
+        if student_commits.status_code == requests.codes.ok:
             log.count_gitlab_commits = len(student_commits.json())  # set commits count
         else:
-            print(student_commits.content)
             return student_commits.json()['message']

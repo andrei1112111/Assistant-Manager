@@ -7,6 +7,7 @@ from src.db.entity import StudentDB, LogDB
 
 import datetime
 from pytz import timezone
+import requests
 
 
 class Kimai(BaseService):
@@ -29,7 +30,7 @@ class Kimai(BaseService):
         if users is None:
             return f'Failed to connect to "{self.url + f"/api/users"}".'
 
-        if users.status_code != 200:
+        if users.status_code != requests.codes.ok:
             if "message" in users.json().keys():
                 return users.json()['message']
             else:
@@ -61,7 +62,7 @@ class Kimai(BaseService):
             }
         )
 
-        if timesheets.status_code != 200:
+        if timesheets.status_code != requests.codes.ok:
             if "message" in timesheets.json().keys():
                 return f"{timesheets.json()['message']}"
             else:

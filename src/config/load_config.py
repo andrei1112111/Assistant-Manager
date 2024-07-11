@@ -42,6 +42,10 @@ def load_config() -> ConfigModel:
         },
     }
 
+    # The package size is too large
+    if config_data["package_of_students_size"] > 200:
+        config_data["package_of_students_size"] = 200
+
     # Validate config
     config_model = ConfigModel(**config_data)
 
