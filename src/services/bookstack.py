@@ -14,7 +14,7 @@ class BookStack(BaseService):
         bookstack_username = student.logins.get("bookstack", None)
 
         if bookstack_username is None:
-            raise f"Student '{student.name}' doesn't have Bookstack username."
+            raise Exception(f"Student '{student.name}' doesn't have Bookstack username.")
 
         user_id = get_request(  # get all users with name like student.Bookstack_username
             url=self.url + "/api/users",
@@ -29,11 +29,11 @@ class BookStack(BaseService):
             raise ConnectionError(f'Failed to connect to "{self.url + "/api/users"}".')
 
         if user_id.status_code != requests.codes.ok:
-            raise f'Failed to get by api "{self.url + "/api/users"}" with status code {user_id.status_code}.'
+            raise Exception(f'Failed to get by api "{self.url + "/api/users"}" with status code {user_id.status_code}.')
 
         if user_id.json()["total"] == 0:  # such users are not founded
-            raise (f"The user '{student.name}' is not registered in the Bookstack"
-                   f" or has a different username from the specified one.")
+            raise Exception(f"The user '{student.name}' is not registered in the Bookstack"
+                            f" or has a different username from the specified one.")
 
         current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
@@ -52,6 +52,7 @@ class BookStack(BaseService):
             raise ConnectionError(f'Failed to connect to "{self.url + "/api/audit-log"}".')
 
         if audit.status_code != requests.codes.ok:
-            raise f'Failed to get by api "{self.url + "/api/audit-log"}" with status code {audit.status_code}.'
+            raise Exception(f'Failed to get by api "{self.url + "/api/audit-log"}"'
+                            f' with status code {audit.status_code}.')
 
         log.count_bookstack_changes = audit.json()["total"]  # set number of changes
