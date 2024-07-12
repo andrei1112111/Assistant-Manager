@@ -22,7 +22,7 @@ def load_config() -> ConfigModel:
         },
         "Gitlab": {
             "url": os.getenv("GITLAB_URL"),
-            "token": None,
+            "token": os.getenv("GITLAB_TOKEN"),
             "secret_token": None
         },
         "Kimai": {

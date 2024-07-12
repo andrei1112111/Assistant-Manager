@@ -28,9 +28,11 @@ class GitLab(BaseService):
             params={
                 "action": "commit",
                 "after": yesterday_date,
-                "before": tomorrow_date
+                "before": tomorrow_date,
             },
-            headers={}
+            headers={
+                "Authorization": f"Bearer {config.Gitlab.token}"
+            }
         )
         if student_commits is None:
             raise ConnectionError(f'Failed to connect to "{self.url + f"/api/v4/users/{gitlab_username}/events"}".')
