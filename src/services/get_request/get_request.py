@@ -25,7 +25,9 @@ def get_request(
             total=retry_params.max_attempts,
             backoff_factor=retry_params.delay_seconds
         )
+        # set max_retries for all http/https request
         session.mount('http://', HTTPAdapter(max_retries=retries))
+        session.mount('https://', HTTPAdapter(max_retries=retries))
 
         try:
             resp = session.get(

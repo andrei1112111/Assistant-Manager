@@ -6,7 +6,8 @@ WORKDIR /opt/bot
 
 COPY . .
 
-RUN apt update \
+RUN rm -rf .env \
+    && apt update \
     && apt-get update \
     && apt-get -y install libpq-dev gcc \
     && pip install psycopg2 \
