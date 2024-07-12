@@ -1,77 +1,57 @@
-from src.parsers.bookstack import parse_activity
-from src.parsers.gitlab import parse_commits
-from src.parsers.kimai import parse_active_hours
-from src.parsers.plane import parse_active_tasks
-from src.additional import Student
+from services import plane_service, kimai_service, gitlab_service, bookStack_service
+from src.db.repository import students_repository, action_log_repository
+from src.logger import logger
+from src.db.entity import LogDB
+from src.config import config
 
-from time import sleep
-import configparser
-import threading
-import schedule
-import logging
-import sys
-
-logging.getLogger('').addHandler(logging.StreamHandler(sys.stdout))
-logging.getLogger('').setLevel(logging.INFO)
-
-config = configparser.ConfigParser()
-config.read("config/settings.ini")
+from scheduler import start_scheduler
 
 
-def run_threaded(job_func, peoples):
-    job_thread = threading.Thread(
-        target=job_func,
-        args=(peoples, )
-    )
-    job_thread.start()
+def run_app():
+    def job():
+        offset = 0
+
+        while True:  # while package is not empty
+            # get package of active students from bd
+            students = students_repository.get_active_users(limit=config.package_of_students_size, offset=offset)
+
+            if len(students) == 0:  # There are no more students in the database
+                logger.info("All students have been successfully processed")
+                break
+
+            logMap = dict()
+            for student in students:  # empty logs for students (one log for one student)
+                logMap[student.id] = LogDB(student_id=student.id)
+
+                # fill logs with activities
+                for service in [plane_service, kimai_service, gitlab_service, bookStack_service]:
+                    try:
+                        service.fill_student_activity(student, logMap[student.id])
+
+                    except Exception as fail_reason:
+                        # add fail_reason to log.fail_reasons
+                        if logMap[student.id].fail_reasons is None:
+                            logMap[student.id].fail_reasons = ""
+
+                        msg = f"|{service.__class__.__name__}: {fail_reason}|"
+                        logMap[student.id].fail_reasons += msg
+                        logger.warning(msg)
+
+            # push logs to db
+            action_log_repository.save_all(
+                logMap.values()
+            )
+
+            # shift offset to get the next package
+            offset += config.package_of_students_size
+
+    # job()
+
+    logger.info(f"The scheduler is waiting for "
+                f"{str(config.schedule_time.hour).zfill(2)}:{str(config.schedule_time.minute).zfill(2)}.")
+
+    start_scheduler(job)
 
 
-# students for testing
-students = [
-    Student(
-        "root",
-        "None",
-        None,
-        None
-    ),
-    Student(
-        "testtest",  # gitlub nickname
-        "testingworkspace",  # ? plane workspace name
-        None,
-        None
-    ),
-    Student(
-        "not_existing_user",
-        None,
-        None,
-        None
-    ),
-]
-# -
-
-schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
-    run_threaded, parse_activity,
-    students,
-)  # task for bookstack
-
-schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
-    run_threaded, parse_commits,
-    students,
-)  # task for gitlab
-
-schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
-    run_threaded, parse_active_tasks,
-    students,
-)  # task for plane
-
-schedule.every().day.at(config['Time']['wakeup time'], config['Time']['timezone']).do(
-    run_threaded, parse_active_hours,
-    students,
-)  # task for kimai
-
-while True:
-    schedule.run_pending()
-    sleep(1)
-
-
-# run_threaded(parse_commits, students)
+if __name__ == "__main__":
+    run_app()

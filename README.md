@@ -1,46 +1,49 @@
+# Ассистент Сберлаб-НГУ
 
-# SberLab_NSU_Assistant
+**Интеллектуальная система для студентов и сотрудников Сберлаб-НГУ, позволяющая автоматизировать большинство внутренних процессов в лаборатории, таких как сбор отчетов, расчет показателей, учет посещаемости, активности в дискуссиях и т.д. Система интегрируется с [__Gitlab__](), [__Kimai__](), [__BookStack__]() и [__Plane__]().**
 
-**Intelligent system for students and employees of Sberlab-NSU, which allows to automate most of the internal processes in the laboratory, such as collecting reports, calculating indicators, accounting for attendance, activity in discussions, etc. As part of the development of this project, integration with key systems such as Plane, Gitlab, Ki mai, and Book stack is necessary. The system integrates with [__Gitlab__](), [__Kimai__](), [__BookStack__]() and [__Plane__]().**
-# Getting Started
-This is an example of how you may set up this project locally. To get a local copy up and running follow these simple example steps:
-### Installation
-You can __Pull__ this project from  [__Docker Hub__](https://hub.docker.com)
-```bash
+# Начало работы
+
+### Локально:
+
+0. Убедитесь что у вас установлены:
+* [Git](https://git-scm.com/)
+* [Python3.8.10 or later](https://www.python.org/)
+* [Docker](https://www.docker.com/)
+* 
+1. Скопировать репозиторий
+```shell
+git clone https://gitlab.sberlab.nsu.ru/a.tishkin/sberlab_nsu_assistant
+cd sberlab_nsu_assistant
+```
+2. Создать виртуальную среду
+```shell
+python -m venv .venv
+source .venv/bin/activate
+```
+3. Установить зависимости
+```shell
+pip install -r ./src/requirements.txt
+```
+4. Установить переменные среды
+```shell
+cp .env.local.exmaple .env
+nano .env
+```
+5. Запустить базу данных
+```shell
+```
+6. Запустить скрипт
+```shell
+python app/main.py
+```
+
+### Docker:
 ...
-```
-And __Run__ it using:
-```bash
-...
-```
-...
-### Usage
 
-At first you need to change the [settings.ini](settings.ini)
-* Check the timezone 
-```
-[Time]
-...
-timezone = Asia/Novosibirsk
-```
-* Look at wakeup time 
-```
-[Time]
-...
-wakeup time = 12:39
-```
-* Check the Service addresses 
-```
-[Services hosts]
-plane = ...
-kimai = ...
-gitlab = ...
-bookstack = ...
 
-```
+## Контакты
 
-## Contact
+Andrei - Telegram **@Lizarcon** - a.tishkin1@g.nsu.ru
 
-Andrei - [@Lizarcon]() - a.tishkin1@g.nsu.ru
-
-Project Link: https://gitlab.sberlab.nsu.ru/a.tishkin/sberlab_nsu_assistant#sberlab_nsu_assistant
+Ссылка на репозиторий: https://gitlab.sberlab.nsu.ru/a.tishkin/sberlab_nsu_assistant#sberlab_nsu_assistant
