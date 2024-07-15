@@ -40,4 +40,5 @@ class GitLab(BaseService):
         if student_commits.status_code == requests.codes.ok:
             log.count_gitlab_commits = len(student_commits.json())  # set commits count
         else:
-            raise Exception(student_commits.json()['message'])
+            raise Exception(student_commits.json()['message'] +
+                            f"({student_commits.status_code}, {self.url + f'/api/v4/users/{gitlab_username}/events'})")

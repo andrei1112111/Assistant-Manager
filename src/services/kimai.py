@@ -32,7 +32,7 @@ class Kimai(BaseService):
 
         if users.status_code != requests.codes.ok:
             if "message" in users.json().keys():
-                raise Exception(users.json()['message'])
+                raise Exception(users.json()['message'] + f"({users.status_code}, users)")
             else:
                 raise Exception("Kimai return nothing when users are requested."
                                 " Maybe this is an authorization error.")
@@ -68,7 +68,7 @@ class Kimai(BaseService):
 
         if timesheets.status_code != requests.codes.ok:
             if "message" in timesheets.json().keys():
-                raise Exception(f"{timesheets.json()['message']}")
+                raise Exception(f"{timesheets.json()['message']}" + f"({timesheets.status_code}, timesheets)")
             else:
                 raise Exception(f"Kimai api return nothing when timesheets are requested.")
 
