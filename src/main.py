@@ -37,8 +37,6 @@ def run_app():
                         logMap[student.id].fail_reasons += msg
                         logger.warning(msg)
 
-                logger.info(f"{student.name}: {logMap[student.id].plane_tasks}|{logMap[student.id].count_kimai_hours}|{logMap[student.id].count_bookstack_changes}|{logMap[student.id].count_gitlab_commits}")
-
             # push logs to db
             action_log_repository.save_all(
                 logMap.values()
@@ -46,7 +44,8 @@ def run_app():
 
             # shift offset to get the next package
             offset += config.package_of_students_size
-    job()
+
+    # job()
 
     logger.info(f"The scheduler is waiting for "
                 f"{str(config.schedule_time.hour).zfill(2)}:{str(config.schedule_time.minute).zfill(2)}.")

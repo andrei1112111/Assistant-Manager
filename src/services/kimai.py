@@ -32,7 +32,7 @@ class Kimai(BaseService):
 
         if users.status_code != requests.codes.ok:
             if "message" in users.json().keys():
-                raise Exception(users.json()['message'] + f"({users.status_code}, users)")
+                raise Exception(users.json()['message'])
             else:
                 raise Exception("Kimai return nothing when users are requested."
                                 " Maybe this is an authorization error.")
@@ -41,7 +41,7 @@ class Kimai(BaseService):
 
         # get all ids of usernames with the same name
         users_with_same_name = [
-            user["id"] for user in users if user["username"] == kimai_username
+            user["username"] for user in users if user["username"] == kimai_username
         ]
 
         if len(users_with_same_name) == 0:  # we not find users with name = kimai_username
@@ -68,16 +68,15 @@ class Kimai(BaseService):
 
         if timesheets.status_code != requests.codes.ok:
             if "message" in timesheets.json().keys():
-                raise Exception(f"{timesheets.json()['message']}" + f"({timesheets.status_code},"
-                                                                    f" timesheets, {user_id})")
+                raise Exception(f"{timesheets.json()['message']}")
             else:
                 raise Exception(f"Kimai api return nothing when timesheets are requested.")
 
         log.count_kimai_hours = round(
-            (sum(  # sum duration of timesheets
+            sum(  # sum duration of timesheets
                 [
                     timesheet["duration"] for timesheet in timesheets.json()
                 ]
-            ) / 60) / 60,  # in seconds -> in hours
+            ) / 60,  # in hours
             3  # rounded to three decimal places (for ex. 61 minutes = 1.017 hours)
         )

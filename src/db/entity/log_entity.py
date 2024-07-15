@@ -1,4 +1,4 @@
-from sqlalchemy import Column, INTEGER, DATE, TEXT, FLOAT, func
+from sqlalchemy import Column, INTEGER, DATE, TEXT, FLOAT
 from datetime import datetime
 from pytz import timezone
 
@@ -24,12 +24,6 @@ class LogDB(Base):
     student_id = Column(
         INTEGER
     )
-    # id = Column(
-    #     UUID(as_uuid=True), primary_key=True, server_default=func.gen_random_uuid(), default=func.gen_random_uuid()
-    # )
-    # student_id = Column(
-    #     UUID(as_uuid=True)
-    # )
     date = Column(
         DATE, default=now_in_timezone, onupdate=now_in_timezone
     )
