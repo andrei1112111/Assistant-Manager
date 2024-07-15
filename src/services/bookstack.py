@@ -39,20 +39,20 @@ class BookStack(BaseService):
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         audit = get_request(  # get changes-log for student.Bookstack_username-id created today
-            url=self.url + "/api/audit-log",
+            url=self.url + "/api/pages",
             headers={
                 "Authorization": f"Token {self.token}:{self.secret}"
             },
             params={
-                "filter[created_at:gt]": current_date,
-                "filter[user:eq]": user_id.json()["data"][0]["id"]
+                "filter[updated_at:gt]": current_date,
+                "filter[updated_by:eq]": user_id.json()["data"][0]["id"]
             }
         )
         if audit is None:
-            raise ConnectionError(f'Failed to connect to "{self.url + "/api/audit-log"}".')
+            raise ConnectionError(f'Failed to connect to "{self.url + "/api/pages"}".')
 
         if audit.status_code != requests.codes.ok:
-            raise Exception(f'Failed to get by api "{self.url + "/api/audit-log"}"'
+            raise Exception(f'Failed to get by api "{self.url + "/api/pages"}"'
                             f' with status code {audit.status_code}.')
 
         log.count_bookstack_changes = audit.json()["total"]  # set number of changes

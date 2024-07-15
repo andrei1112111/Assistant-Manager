@@ -37,6 +37,11 @@ def run_app():
                         logMap[student.id].fail_reasons += msg
                         logger.warning(msg)
 
+                # logger.info(
+                #     f"{student.name}: {logMap[student.id].plane_tasks}|"
+                #     f"{logMap[student.id].count_kimai_hours}|{logMap[student.id].count_bookstack_changes}|"
+                #     f"{logMap[student.id].count_gitlab_commits}")
+
             # push logs to db
             action_log_repository.save_all(
                 logMap.values()

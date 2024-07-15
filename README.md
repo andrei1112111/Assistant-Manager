@@ -39,7 +39,9 @@ python app/main.py
 ```
 
 ### Docker:
-...
+```shell
+docker push andrei1121212/sberlab_assistant:amd64
+```
 
 
 ## Контакты
