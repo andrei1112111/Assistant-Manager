@@ -45,8 +45,6 @@ def run_app():
             # shift offset to get the next package
             offset += config.package_of_students_size
 
-    # job()
-
     logger.info(f"The scheduler is waiting for "
                 f"{str(config.schedule_time.hour).zfill(2)}:{str(config.schedule_time.minute).zfill(2)}.")
 
