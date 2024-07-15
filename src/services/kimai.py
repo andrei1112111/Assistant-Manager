@@ -12,7 +12,7 @@ import requests
 
 class Kimai(BaseService):
     def fill_student_activity(self, student: StudentDB, log: LogDB):
-        kimai_username = student.logins.get("gitlab", None)
+        kimai_username = student.logins.get("kimai", None)
 
         if kimai_username is None:
             raise Exception(f"Student '{student.name}' does not have Kimai username.")

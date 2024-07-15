@@ -1,15 +1,9 @@
 from sqlalchemy import Column, INTEGER, DATE, TEXT, FLOAT, func
 from datetime import datetime
 from pytz import timezone
-from src.db.session import Session
 
 from .base_entity import Base
 from src.config import config
-
-
-def next_id():
-    max_id = Session().query(func.max(LogDB.id)).scalar()
-    return max_id + 1
 
 
 def now_in_timezone():
@@ -25,7 +19,7 @@ class LogDB(Base):
     __tablename__ = "logbook"
 
     id = Column(
-        INTEGER, primary_key=True, autoincrement=True, default=next_id, unique=True
+        INTEGER, primary_key=True
     )
     student_id = Column(
         INTEGER
