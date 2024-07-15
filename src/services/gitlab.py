@@ -17,28 +17,6 @@ class GitLab(BaseService):
         if gitlab_username is None:
             raise Exception(f"Student '{student.name}' does not have Gitlab username.")
 
-        # get user id
-        student_id = get_request(
-            url=self.url + f"/api/v4/users/",
-            params={
-                "username": gitlab_username
-            },
-            headers={
-                "Authorization": f"Bearer {config.Gitlab.token}"
-            }
-        )
-        if student_id is None:
-            raise Exception(f'Failed to connect to "{self.url + f"/api/v4/users/"}".')
-
-        if student_id.status_code == requests.codes.ok:
-            student_id = student_id.json()[0]["id"]
-        else:
-            raise Exception(
-                f"{student_id.content}" +
-                f"({student_id.status_code},"
-                f" {self.url + f'/api/v4/users/'} for {gitlab_username})"
-            )
-
         yesterday_date = datetime.datetime.now(tz=timezone(str(config.timezone))) - datetime.timedelta(1)  # yesterday
         yesterday_date = yesterday_date.strftime("%Y-%m-%d")
 
@@ -46,7 +24,7 @@ class GitLab(BaseService):
         tomorrow_date = tomorrow_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         student_commits = get_request(  # get all commits by student.GitLab_username created today
-            url=self.url + f"/api/v4/users/{student_id}/events",
+            url=self.url + f"/api/v4/users/{gitlab_username}/events",
             params={
                 "action": "commit",
                 "after": yesterday_date,
@@ -57,13 +35,10 @@ class GitLab(BaseService):
             }
         )
         if student_commits is None:
-            raise Exception(f'Failed to connect to "{self.url + f"/api/v4/users/{student_id}/events"}".')
+            raise ConnectionError(f'Failed to connect to "{self.url + f"/api/v4/users/{gitlab_username}/events"}".')
 
         if student_commits.status_code == requests.codes.ok:
             log.count_gitlab_commits = len(student_commits.json())  # set commits count
         else:
-            raise Exception(
-                f"{student_commits.content}" +
-                f"({student_commits.status_code},"
-                f" {self.url + f'/api/v4/users/{student_id}/events'} for {gitlab_username})"
-            )
+            raise Exception(student_commits.json()['message'] +
+                            f"({student_commits.status_code}, {self.url + f'/api/v4/users/{gitlab_username}/events'})")
