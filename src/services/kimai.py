@@ -1,17 +1,15 @@
 from __future__ import annotations
 
-from src.config import config
 from .base_service import BaseService
 from .get_request import get_request
 from src.db.entity import StudentDB, LogDB
 
-import datetime
-from pytz import timezone
+from datetime import datetime
 import requests
 
 
 class Kimai(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: LogDB, current_date: datetime):
         kimai_username = student.logins.get("kimai", None)
 
         if kimai_username is None:
@@ -49,7 +47,6 @@ class Kimai(BaseService):
 
         user_id = users_with_same_name[0]  # there is probably only one such user
 
-        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         # get user timesheets

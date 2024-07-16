@@ -3,14 +3,12 @@ from __future__ import annotations
 from src.db.entity import StudentDB, LogDB
 from .base_service import BaseService
 from .get_request import get_request
-from src.config import config
-from pytz import timezone
-import datetime
+from datetime import datetime, timedelta
 import requests
 
 
 class BookStack(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: LogDB, current_date: datetime):
         bookstack_username = student.logins.get("bookstack", None)
 
         if bookstack_username is None:
@@ -35,7 +33,9 @@ class BookStack(BaseService):
             raise Exception(f"The user '{student.name}' is not registered in the Bookstack"
                             f" or has a different username from the specified one.")
 
-        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))  # current date
+        tomorrow_date = current_date + timedelta(1)  # tomorrow
+        tomorrow_date = tomorrow_date.strftime("%Y-%m-%d")  # like '2024-03-09'
+
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         audit = get_request(  # get changes-log for student.Bookstack_username-id created today
@@ -45,6 +45,7 @@ class BookStack(BaseService):
             },
             params={
                 "filter[updated_at:gt]": current_date,
+                "filter[updated_at:lt]": tomorrow_date,
                 "filter[updated_by:eq]": user_id.json()["data"][0]["id"]
             }
         )

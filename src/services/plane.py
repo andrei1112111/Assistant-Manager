@@ -5,6 +5,7 @@ from .get_request import get_request
 from src.db.entity import StudentDB, LogDB
 
 import requests
+from datetime import datetime
 
 issue_states = {
     "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",
@@ -16,7 +17,7 @@ issue_states = {
 
 
 class Plane(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: LogDB, current_date: datetime):
         plane_workspace = student.logins.get("plane", None)
 
         if plane_workspace is None:

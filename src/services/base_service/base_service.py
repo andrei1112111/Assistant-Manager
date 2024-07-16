@@ -2,6 +2,8 @@ from __future__ import annotations
 
 from src.db.entity import LogDB, StudentDB
 
+from datetime import datetime
+
 
 class BaseService:
     def __init__(self, url, token, secret):
@@ -9,7 +11,7 @@ class BaseService:
         self.token: str | None = token
         self.secret: str | None = secret
 
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: LogDB, current_date: datetime):
         """
         Accesses the api to get data about user activity on the service.
         In case of an error, function raise it.

@@ -25,7 +25,7 @@ class LogDB(Base):
         INTEGER
     )
     date = Column(
-        DATE, default=now_in_timezone, onupdate=now_in_timezone
+        DATE, default=now_in_timezone
     )
     plane_tasks = Column(
         TEXT, default=None

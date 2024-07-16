@@ -5,13 +5,12 @@ from .base_service import BaseService
 from .get_request import get_request
 from src.db.entity import StudentDB, LogDB
 
-import datetime
-from pytz import timezone
+from datetime import datetime, timedelta
 import requests
 
 
 class GitLab(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: LogDB, current_date: datetime):
         gitlab_username = student.logins.get("gitlab", None)
 
         if gitlab_username is None:
@@ -39,10 +38,10 @@ class GitLab(BaseService):
                 f" {self.url + f'/api/v4/users/'} for {gitlab_username})"
             )
 
-        yesterday_date = datetime.datetime.now(tz=timezone(str(config.timezone))) - datetime.timedelta(1)  # yesterday
+        yesterday_date = current_date - timedelta(1)  # yesterday
         yesterday_date = yesterday_date.strftime("%Y-%m-%d")
 
-        tomorrow_date = datetime.datetime.now(tz=timezone(str(config.timezone))) + datetime.timedelta(1)  # tomorrow
+        tomorrow_date = current_date + timedelta(1)  # tomorrow
         tomorrow_date = tomorrow_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         student_commits = get_request(  # get all commits by student.GitLab_username created today
