@@ -5,28 +5,34 @@ from .get_request import get_request
 from src.db.entity import StudentDB, LogDB
 
 import requests
-from datetime import datetime
-
-issue_states = {
-    "80ea7b83-467a-40e6-bc89-2ee6bad2c4cb": "done",
-    "0cba5ea3-e5c1-47be-bdf8-1142a2f44b40": "in progress",
-    "febb8d6b-e80e-4ade-aedf-0883e3583bce": "todo",
-    "48c89c98-0074-413a-afbe-0968b421fd5d": "cancelled",
-    "614a4ab9-e51d-4427-b803-1677fc49bef5": "backlog"
-}  # meaning of status codes
+import json
+from os.path import exists
 
 
 class Plane(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB, current_date: datetime):
-        plane_workspace = student.logins.get("plane", None)
+    def fill_student_activity(self, student: StudentDB, log: LogDB):
+        plane_data = student.logins.get("plane", None)
 
-        if plane_workspace is None:
-            raise Exception(f"Student '{student.name}' does not have Plane workspace.")
+        if plane_data is None or len(plane_data.split("|")) != 2:
+            raise Exception(f"Student '{student.name}' does not have Plane workspace or email.")
+
+        plane_workspace, plane_email = plane_data.split("|")
+
+        if not exists(self.token):
+            raise Exception(f"Won't find plane tokens file {self.token}")
+
+        with open(self.token, "r") as file:
+            tokens = json.load(file)
+
+        plane_workspace_token = tokens.get(plane_workspace, None)
+
+        if plane_workspace_token is None:
+            raise Exception(f"Plane workspace token for '{plane_workspace}' not exist in tokens file '{self.token}'.")
 
         projects = get_request(  # get projects in workspace
             url=self.url + f"/api/v1/workspaces/{plane_workspace}/projects/",
             headers={
-                "x-api-key": self.token
+                "x-api-key": plane_workspace_token
             },
             params={}
         )
@@ -44,9 +50,10 @@ class Plane(BaseService):
             issues = get_request(  # get all issues in projects
                 url=self.url + f"/api/v1/workspaces/{plane_workspace}/projects/{project['id']}/issues/",
                 headers={
-                    "x-api-key": self.token
+                    "x-api-key": plane_workspace_token
                 },
-                params={}
+                params={"expand": "assignees,state",
+                        "fields": "assignees,state,name", }
             )
 
             if projects is None:
@@ -60,7 +67,8 @@ class Plane(BaseService):
 
             active_issues = []
             for issue in issues.json()["results"]:
-                if issue_states[issue["state"]] == "in progress":
+                if issue["state"]["group"] == "started" and \
+                        plane_email in [i["email"] for i in issue["assignees"]]:
                     active_issues.append(issue["name"])  # save all issues with status 'in progress'
 
             active_issues.sort()  # issues are sorted by alphabetic orger
