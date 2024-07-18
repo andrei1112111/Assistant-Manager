@@ -84,10 +84,11 @@ class Kimai(BaseService):
             3  # rounded to three decimal places (for ex. 61 minutes = 1.017 hours)
         )
 
-    def fill_student_activity_last7_days(self, student: StudentDB, logs: List[LogDB]):
+    def fill_student_activity_last4_days(self, student: StudentDB, logs: List[LogDB]):
         current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))
 
-        last_7days_dates = [current_date - datetime.timedelta(delta) for delta in range(1, 7, 1)]
+        last_4days_dates = [current_date - datetime.timedelta(delta) for delta in range(1, 5)]
 
-        for log, date in zip(logs, last_7days_dates):
+        for log, date in zip(logs, last_4days_dates):
+            log.date = date
             self.fill_student_activity(student, log, date)

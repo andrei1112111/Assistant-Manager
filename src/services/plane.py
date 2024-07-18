@@ -13,11 +13,13 @@ class Plane(BaseService):
     def fill_student_activity(self, student: StudentDB, log: LogDB):
         plane_data = student.logins.get("plane", None)
 
-        if plane_data is None or len(plane_data.split("|")) != 2:
-            raise Exception(f"Student '{student.name}' does not have Plane workspace or email.")
+        if plane_data is None:
+            raise Exception(f"Student '{student.name}' does not have Plane workspace and email.")
         if len(plane_data.split("|")) == 2:
-            if plane_data.split("|")[2] == '':
+            if plane_data.split("|")[1] == '':
                 raise Exception(f"Student '{student.name}' does not have Plane email.")
+        else:
+            raise Exception(f"Student '{student.name}' does not have Plane workspace or email.")
 
         plane_workspace, plane_email = plane_data.split("|")
 
