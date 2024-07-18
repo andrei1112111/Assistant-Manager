@@ -12,7 +12,7 @@ from pytz import timezone
 def run_app():
     def job():
         # current_date = datetime.now(tz=timezone(str(config.timezone)))  # current date
-        for i in range(2, 16, 1):
+        for i in range(2, 17, 1):
             current_date = datetime(year=2024, month=7, day=i)
             if current_date.weekday() < 5:  # only | 0-4 | mon-fri |
                 logger.info(f"?>------------------{current_date}------------------?>")
