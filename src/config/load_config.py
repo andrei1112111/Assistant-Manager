@@ -32,7 +32,7 @@ def load_config() -> ConfigModel:
         },
         "Plane": {
             "url": os.getenv("PLANE_URL"),
-            "token": os.getenv("PLANE_TOKEN"),
+            "token": os.getenv("PLANE_TOKENS_PATH"),
             "secret_token": None
         },
         "BookStack": {
@@ -45,6 +45,9 @@ def load_config() -> ConfigModel:
     # The package size is too large
     if config_data["package_of_students_size"] > 200:
         config_data["package_of_students_size"] = 200
+
+    if not os.path.exists(config_data["Plane"]["token"]):
+        raise FileNotFoundError(f"{config_data['Plane']['token']} not found")
 
     # Validate config
     config_model = ConfigModel(**config_data)

@@ -21,6 +21,7 @@ def run_app():
 
             logMap = dict()
             for student in students:  # empty logs for students (one log for one student)
+                print(student.name, student.surname)
                 logMap[student.id] = LogDB(student_id=student.id)
 
                 # fill logs with activities
@@ -37,11 +38,15 @@ def run_app():
                         logMap[student.id].fail_reasons += msg
                         logger.warning(msg)
 
-                # logger.info(
-                #     f"{student.name}: {logMap[student.id].plane_tasks}|"
-                #     f"{logMap[student.id].count_kimai_hours}|{logMap[student.id].count_bookstack_changes}|"
-                #     f"{logMap[student.id].count_gitlab_commits}")
-
+                logLast7days = [LogDB(student_id=student.id) for _ in range(7)]
+                try:
+                    kimai_service.fill_student_activity_last7_days(student, logLast7days)
+                except Exception as fail_reason:
+                    logger.warning(f"on last7days |{service.__class__.__name__}: {fail_reason}|")
+                action_log_repository.update_kimai(logLast7days)
+                print(logMap[student.id].count_kimai_hours, logMap[student.id].count_gitlab_commits,
+                      logMap[student.id].count_bookstack_changes, logMap[student.id].plane_tasks)
+                print([i.count_kimai_hours for i in logLast7days])
             # push logs to db
             action_log_repository.save_all(
                 logMap.values()
@@ -50,7 +55,10 @@ def run_app():
             # shift offset to get the next package
             offset += config.package_of_students_size
 
-    # job()
+    from time import sleep
+    sleep(60)
+    print("job")
+    job()
 
     logger.info(f"The scheduler is waiting for "
                 f"{str(config.schedule_time.hour).zfill(2)}:{str(config.schedule_time.minute).zfill(2)}.")

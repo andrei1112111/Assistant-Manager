@@ -9,6 +9,7 @@ COPY . .
 RUN rm -rf .env \
     && apt update \
     && apt-get update \
+    && apt-get install nano \
     && apt-get -y install libpq-dev gcc \
     && pip install psycopg2 \
     && apt install -y libpq-dev \

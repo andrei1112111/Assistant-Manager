@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+from typing import List
+
 from src.config import config
 from .base_service import BaseService
 from .get_request import get_request
@@ -11,7 +13,8 @@ import requests
 
 
 class Kimai(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: LogDB,
+                              current_date=datetime.datetime.now(tz=timezone(str(config.timezone)))):
         kimai_username = student.logins.get("kimai", None)
 
         if kimai_username is None:
@@ -49,7 +52,6 @@ class Kimai(BaseService):
 
         user_id = users_with_same_name[0]  # there is probably only one such user
 
-        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         # get user timesheets
@@ -81,3 +83,11 @@ class Kimai(BaseService):
             ) / 60) / 60,  # in seconds -> in hours
             3  # rounded to three decimal places (for ex. 61 minutes = 1.017 hours)
         )
+
+    def fill_student_activity_last7_days(self, student: StudentDB, logs: List[LogDB]):
+        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))
+
+        last_7days_dates = [current_date - datetime.timedelta(delta) for delta in range(1, 7, 1)]
+
+        for log, date in zip(logs, last_7days_dates):
+            self.fill_student_activity(student, log, date)
