@@ -14,12 +14,12 @@ class Plane(BaseService):
         plane_data = student.logins.get("plane", None)
 
         if plane_data is None:
-            raise Exception(f"Student '{student.name}' does not have Plane workspace and email.")
+            raise Exception(f"Student '{student.name} {student.surname}' does not have Plane workspace and email.")
         if len(plane_data.split("|")) == 2:
             if plane_data.split("|")[1] == '':
-                raise Exception(f"Student '{student.name}' does not have Plane email.")
+                raise Exception(f"Student '{student.name} {student.surname}' does not have Plane email.")
         else:
-            raise Exception(f"Student '{student.name}' does not have Plane workspace or email.")
+            raise Exception(f"Student '{student.name} {student.surname}' does not have Plane workspace or email.")
 
         plane_workspace, plane_email = plane_data.split("|")
 
@@ -47,7 +47,7 @@ class Plane(BaseService):
                                   f' "{self.url + f"/api/v1/workspaces/{plane_workspace}/projects/"}".')
 
         if projects.status_code != requests.codes.ok:
-            raise Exception(f"Failed to find user's '{student.name}' workspace '{plane_workspace}'.")
+            raise Exception(f"Failed to find user's '{student.name} {student.surname}' workspace '{plane_workspace}'.")
 
         projects = projects.json()["results"]
 
@@ -68,7 +68,7 @@ class Plane(BaseService):
                 )
 
             if issues.status_code != requests.codes.ok:
-                raise Exception(f"For student '{student.name}': {issues.json()['detail']}'.")
+                raise Exception(f"For student '{student.name} {student.surname}': {issues.json()['detail']}'.")
 
             active_issues = []
             for issue in issues.json()["results"]:

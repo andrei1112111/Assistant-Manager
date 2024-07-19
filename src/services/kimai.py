@@ -18,7 +18,7 @@ class Kimai(BaseService):
         kimai_username = student.logins.get("kimai", None)
 
         if kimai_username is None:
-            raise Exception(f"Student '{student.name}' does not have Kimai username.")
+            raise Exception(f"Student '{student.name} {student.surname}' does not have Kimai username.")
 
         users = get_request(  # get all users
             url=self.url + f"/api/users",
@@ -48,7 +48,7 @@ class Kimai(BaseService):
         ]
 
         if len(users_with_same_name) == 0:  # we not find users with name = kimai_username
-            raise Exception(f"The user '{student.name}' is not registered in the Kimai.")
+            raise Exception(f"The user '{student.name} {student.surname}' is not registered in the Kimai.")
 
         user_id = users_with_same_name[0]  # there is probably only one such user
 

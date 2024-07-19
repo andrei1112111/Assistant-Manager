@@ -14,7 +14,7 @@ class BookStack(BaseService):
         bookstack_username = student.logins.get("bookstack", None)
 
         if bookstack_username is None:
-            raise Exception(f"Student '{student.name}' doesn't have Bookstack username.")
+            raise Exception(f"Student '{student.name} {student.surname}' doesn't have Bookstack username.")
 
         user_id = get_request(  # get all users with name like student.Bookstack_username
             url=self.url + "/api/users",

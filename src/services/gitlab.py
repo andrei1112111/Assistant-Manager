@@ -15,7 +15,7 @@ class GitLab(BaseService):
         gitlab_username = student.logins.get("gitlab", None)
 
         if gitlab_username is None:
-            raise Exception(f"Student '{student.name}' does not have Gitlab username.")
+            raise Exception(f"Student '{student.name} {student.surname}' does not have Gitlab username.")
 
         # get user id
         student_id = get_request(
