@@ -3,7 +3,7 @@ from __future__ import annotations
 from src.config import config
 from .base_service import BaseService
 from .get_request import get_request
-from src.db.entity import StudentDB, LogDB
+from src.db.entity import StudentDB, ActivityLogDB
 
 import datetime
 from pytz import timezone
@@ -11,7 +11,7 @@ import requests
 
 
 class GitLab(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: ActivityLogDB):
         gitlab_username = student.logins.get("gitlab", None)
 
         if gitlab_username is None:

@@ -2,37 +2,25 @@ from __future__ import annotations
 
 from .base_service import BaseService
 from .get_request import get_request
-from src.db.entity import StudentDB, LogDB
+from src.db.entity import StudentDB, ActivityLogDB
+
+from src.db.repository import plane_tokens_list_repository
 
 import requests
-import json
-from os.path import exists
 
 
 class Plane(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
-        plane_data = student.logins.get("plane", None)
+    def fill_student_activity(self, student: StudentDB, log: ActivityLogDB):
+        plane_workspace = student.logins.get("plane_workspace", None)
+        plane_email = student.logins.get("email", None)
 
-        if plane_data is None:
-            raise Exception(f"Student '{student.name} {student.surname}' does not have Plane workspace and email.")
-        if len(plane_data.split("|")) == 2:
-            if plane_data.split("|")[1] == '':
-                raise Exception(f"Student '{student.name} {student.surname}' does not have Plane email.")
-        else:
-            raise Exception(f"Student '{student.name} {student.surname}' does not have Plane workspace or email.")
+        if (plane_workspace is None) or (plane_email is None):
+            raise Exception(f"Student '{student.name} {student.surname}' doesnt have plane workspace or email.")
 
-        plane_workspace, plane_email = plane_data.split("|")
-
-        if not exists(self.token):
-            raise Exception(f"Won't find plane tokens file {self.token}")
-
-        with open(self.token, "r") as file:
-            tokens = json.load(file)
-
-        plane_workspace_token = tokens.get(plane_workspace, None)
+        plane_workspace_token = plane_tokens_list_repository.get_token_by_workspace(plane_workspace)
 
         if plane_workspace_token is None:
-            raise Exception(f"Plane workspace token for '{plane_workspace}' not exist in tokens file '{self.token}'.")
+            raise Exception(f"Plane workspace token for '{plane_workspace}' not exist in tokens table.")
 
         projects = get_request(  # get projects in workspace
             url=self.url + f"/api/v1/workspaces/{plane_workspace}/projects/",

@@ -5,7 +5,7 @@ from typing import List
 from src.config import config
 from .base_service import BaseService
 from .get_request import get_request
-from src.db.entity import StudentDB, LogDB
+from src.db.entity import StudentDB, ActivityLogDB
 
 import datetime
 from pytz import timezone
@@ -13,7 +13,7 @@ import requests
 
 
 class Kimai(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB,
+    def fill_student_activity(self, student: StudentDB, log: ActivityLogDB,
                               current_date=datetime.datetime.now(tz=timezone(str(config.timezone)))):
         kimai_username = student.logins.get("kimai", None)
 
@@ -84,7 +84,7 @@ class Kimai(BaseService):
             3  # rounded to three decimal places (for ex. 61 minutes = 1.017 hours)
         )
 
-    def fill_student_activity_last4_days(self, student: StudentDB, logs: List[LogDB]):
+    def fill_student_activity_last4_days(self, student: StudentDB, logs: List[ActivityLogDB]):
         current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))
 
         last_4days_dates = [current_date - datetime.timedelta(delta) for delta in range(1, 5)]

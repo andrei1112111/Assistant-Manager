@@ -32,22 +32,24 @@ def load_config() -> ConfigModel:
         },
         "Plane": {
             "url": os.getenv("PLANE_URL"),
-            "token": os.getenv("PLANE_TOKENS_PATH"),
+            "token": None,
             "secret_token": None
         },
         "BookStack": {
             "url": os.getenv("BOOKSTACK_URL"),
             "token": os.getenv("BOOKSTACK_TOKEN"),
-            "secret_token": os.getenv("BOOKSTACK_SECRET_TOKEN")
+            "secret_token": os.getenv("BOOKSTACK_SECRET_TOKEN"),
+        },
+        "RESTAPI": {
+            "host": os.getenv("RESTAPI_HOST"),
+            "port": os.getenv("RESTAPI_PORT"),
+            "auth_key": os.getenv("RESTAPI_AUTH_KEY"),
         },
     }
 
     # The package size is too large
     if config_data["package_of_students_size"] > 200:
         config_data["package_of_students_size"] = 200
-
-    if not os.path.exists(config_data["Plane"]["token"]):
-        raise FileNotFoundError(f"{config_data['Plane']['token']} not found")
 
     # Validate config
     config_model = ConfigModel(**config_data)
