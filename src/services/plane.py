@@ -49,7 +49,7 @@ class Plane(BaseService):
                         "fields": "assignees,state,name", }
             )
 
-            if projects is None:
+            if issues is None:
                 raise ConnectionError(
                     f'Failed to connect to'
                     f' self.url + f"/api/v1/workspaces/{plane_workspace}/projects/{project["id"]}/issues/".'
