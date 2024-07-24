@@ -1,9 +1,11 @@
 from __future__ import annotations
 
+from typing import List
+
 from src.config import config
 from .base_service import BaseService
 from .get_request import get_request
-from src.db.entity import StudentDB, LogDB
+from src.db.entity import StudentDB, ActivityLogDB
 
 import datetime
 from pytz import timezone
@@ -11,11 +13,12 @@ import requests
 
 
 class Kimai(BaseService):
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: ActivityLogDB,
+                              current_date=datetime.datetime.now(tz=timezone(str(config.timezone)))):
         kimai_username = student.logins.get("kimai", None)
 
         if kimai_username is None:
-            raise Exception(f"Student '{student.name}' does not have Kimai username.")
+            raise Exception(f"Student '{student.name} {student.surname}' does not have Kimai username.")
 
         users = get_request(  # get all users
             url=self.url + f"/api/users",
@@ -45,11 +48,10 @@ class Kimai(BaseService):
         ]
 
         if len(users_with_same_name) == 0:  # we not find users with name = kimai_username
-            raise Exception(f"The user '{student.name}' is not registered in the Kimai.")
+            raise Exception(f"The user '{student.name} {student.surname}' is not registered in the Kimai.")
 
         user_id = users_with_same_name[0]  # there is probably only one such user
 
-        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))  # current date
         current_date = current_date.strftime("%Y-%m-%d")  # like '2024-03-09'
 
         # get user timesheets
@@ -81,3 +83,12 @@ class Kimai(BaseService):
             ) / 60) / 60,  # in seconds -> in hours
             3  # rounded to three decimal places (for ex. 61 minutes = 1.017 hours)
         )
+
+    def fill_student_activity_last4_days(self, student: StudentDB, logs: List[ActivityLogDB]):
+        current_date = datetime.datetime.now(tz=timezone(str(config.timezone)))
+
+        last_4days_dates = [current_date - datetime.timedelta(delta) for delta in range(1, 5)]
+
+        for log, date in zip(logs, last_4days_dates):
+            log.date = date
+            self.fill_student_activity(student, log, date)

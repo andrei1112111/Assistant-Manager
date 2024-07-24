@@ -19,6 +19,12 @@ class PostgresConfigModel(BaseModel):
     db: str
 
 
+class RESTAPIConfigModel(BaseModel):
+    host: str
+    port: str
+    auth_key: str
+
+
 class ConfigModel(BaseModel):
     timezone: pytz.BaseTzInfo  # like 'Asia/Novosibirsk'
     schedule_time: datetime.datetime  # like '18:00'
@@ -31,6 +37,8 @@ class ConfigModel(BaseModel):
     Kimai: ServiceApiConfigModel
     Plane: ServiceApiConfigModel
     BookStack: ServiceApiConfigModel
+
+    RESTAPI: RESTAPIConfigModel
 
     class Config:  # this is necessary to allow pydantic to work with data types from other libraries
         arbitrary_types_allowed = True

@@ -32,13 +32,18 @@ def load_config() -> ConfigModel:
         },
         "Plane": {
             "url": os.getenv("PLANE_URL"),
-            "token": os.getenv("PLANE_TOKEN"),
+            "token": None,
             "secret_token": None
         },
         "BookStack": {
             "url": os.getenv("BOOKSTACK_URL"),
             "token": os.getenv("BOOKSTACK_TOKEN"),
-            "secret_token": os.getenv("BOOKSTACK_SECRET_TOKEN")
+            "secret_token": os.getenv("BOOKSTACK_SECRET_TOKEN"),
+        },
+        "RESTAPI": {
+            "host": os.getenv("RESTAPI_HOST"),
+            "port": os.getenv("RESTAPI_PORT"),
+            "auth_key": os.getenv("RESTAPI_AUTH_KEY"),
         },
     }
 
