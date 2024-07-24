@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from src.db.entity import LogDB, StudentDB
+from src.db.entity import ActivityLogDB, StudentDB
 
 
 class BaseService:
@@ -9,9 +9,9 @@ class BaseService:
         self.token: str | None = token
         self.secret: str | None = secret
 
-    def fill_student_activity(self, student: StudentDB, log: LogDB):
+    def fill_student_activity(self, student: StudentDB, log: ActivityLogDB):
         """
         Accesses the api to get data about user activity on the service.
-        In case of an error, function raise it.
+        In case of an error, function raises it.
         """
         pass

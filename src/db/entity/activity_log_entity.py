@@ -15,7 +15,7 @@ def now_in_timezone():
     )
 
 
-class LogDB(Base):
+class ActivityLogDB(Base):
     __tablename__ = "logbook"
 
     id = Column(
