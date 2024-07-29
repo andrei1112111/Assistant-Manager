@@ -10,7 +10,6 @@
 * [Git](https://git-scm.com/)
 * [Python3.8.10 or later](https://www.python.org/)
 * [Docker](https://www.docker.com/)
-* 
 1. Скопировать репозиторий
 ```shell
 git clone https://gitlab.sberlab.nsu.ru/a.tishkin/sberlab_nsu_assistant
@@ -40,9 +39,9 @@ python app/main.py
 
 ### Docker:
 ```shell
-docker push andrei1121212/sberlab_assistant:amd64
+sudo docker pull andrei1121212/sberlab_assistant:manifest-amd64
 ```
-
+* установить переменные среды из .env.local.example
 
 ## Контакты
 
