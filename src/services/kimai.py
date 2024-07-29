@@ -20,6 +20,8 @@ class Kimai(BaseService):
         if kimai_username is None:
             raise Exception(f"Student '{student.name} {student.surname}' does not have Kimai username.")
 
+        kimai_username = kimai_username.strip()
+
         users = get_request(  # get all users
             url=self.url + f"/api/users",
             headers={
