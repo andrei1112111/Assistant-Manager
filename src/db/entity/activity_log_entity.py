@@ -1,5 +1,5 @@
 from sqlalchemy import Column, INTEGER, DATE, TEXT, FLOAT
-from datetime import datetime
+import datetime
 from pytz import timezone
 
 from .base_entity import Base
@@ -10,7 +10,7 @@ def now_in_timezone():
     """
     Now time in timezone from config
     """
-    return datetime.now(
+    return datetime.datetime.now(
         tz=timezone(str(config.timezone))
     )
 
