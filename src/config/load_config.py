@@ -45,6 +45,11 @@ def load_config() -> ConfigModel:
             "port": os.getenv("RESTAPI_PORT"),
             "auth_key": os.getenv("RESTAPI_AUTH_KEY"),
         },
+        "schedule_plane": {
+            "begin_hour": os.getenv("SCHEDULER_PLANE_BEGIN_HOUR"),
+            "last_hour": os.getenv("SCHEDULER_PLANE_LAST_HOUR"),
+            "interval_minute": os.getenv("SCHEDULER_PLANE_INTERVAL_MINUTE"),
+        },
     }
 
     # The package size is too large

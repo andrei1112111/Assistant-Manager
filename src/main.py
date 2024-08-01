@@ -5,7 +5,7 @@ from src.db.entity import ActivityLogDB, PeopleCountLogDB
 from src.config import config
 import src.utils as utils
 
-from scheduler import start_scheduler
+from scheduler import start_scheduler, add_plane_scheduler
 
 from threading import Thread
 
@@ -34,7 +34,7 @@ def get_students_activity_app():
                 logMap[student.id] = ActivityLogDB(student_id=student.id)
 
                 # fill logs with activities
-                for service in [plane_service, kimai_service, gitlab_service, bookStack_service]:
+                for service in [kimai_service, gitlab_service, bookStack_service]:
                     try:
                         service.fill_student_activity(student, logMap[student.id])
 
@@ -47,17 +47,20 @@ def get_students_activity_app():
                         logMap[student.id].fail_reasons += msg
                         logger.warning(msg)
 
-                logLast4days = [ActivityLogDB(student_id=student.id) for _ in range(1, 5)]
+                logLast7days = [ActivityLogDB(student_id=student.id) for _ in range(1, 8)]
                 try:
-                    kimai_service.fill_student_activity_last4_days(student, logLast4days)
+                    kimai_service.fill_student_activity_last7_days(student, logLast7days)
                 except Exception as fail_reason:
                     logger.warning(f"on last7days |{kimai_service.__class__.__name__}: {fail_reason}|")
 
                 # logger.info(f"{student.name, student.surname, logLast4days}")
-                action_log_repository.update_kimai(logLast4days)
+                logLast7days = [i for i in logLast7days if i.date is not None]
+                action_log_repository.update_kimai(logLast7days)
+
+                # get plane tasks
+                logMap[student.id].plane_tasks = utils.storage.get(student.id)
 
             # push logs to db
-
             # logger.info(f"{[(i.plane_tasks, i.count_kimai_hours) for i in logMap.values()]}")
             action_log_repository.save_all(
                 logMap.values()
@@ -66,9 +69,42 @@ def get_students_activity_app():
             # shift offset to get the next package
             offset += config.package_of_students_size
 
+        utils.storage.clear()
+
+    def update_plane():
+        logger.warning("start parsing plane")
+
+        offset = 0
+
+        while True:  # while the package is not empty
+            # get a package of active students from bd
+            students = students_repository.get_active_users(limit=config.package_of_students_size, offset=offset)
+
+            if len(students) == 0:  # There are no more students in the database
+                logger.info("All students have been successfully processed")
+                break
+
+            logMap = dict()
+            for student in students:
+                logMap[student.id] = ActivityLogDB(student_id=student.id)
+
+                try:
+                    plane_service.fill_student_activity(student, logMap[student.id])
+
+                except Exception as fail_reason:
+                    msg = f"|{plane_service.__class__.__name__}: {fail_reason}|"
+                    logger.warning(msg)
+
+            utils.storage.update(
+                logMap
+            )
+
+            offset += config.package_of_students_size
+
     logger.info(f"The scheduler is waiting for "
                 f"{str(config.schedule_time.hour).zfill(2)}:{str(config.schedule_time.minute).zfill(2)}.")
 
+    add_plane_scheduler(update_plane)
     start_scheduler(job)
 
 

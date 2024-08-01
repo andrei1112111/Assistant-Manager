@@ -11,6 +11,7 @@ import requests
 
 class Plane(BaseService):
     def fill_student_activity(self, student: StudentDB, log: ActivityLogDB):
+        log.plane_tasks = ""
         plane_workspace = student.logins.get("plane_workspace", None)
         plane_email = student.logins.get("email", None)
 

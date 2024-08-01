@@ -19,6 +19,12 @@ class PostgresConfigModel(BaseModel):
     db: str
 
 
+class PlaneConfigModel(BaseModel):
+    begin_hour: int
+    last_hour: int
+    interval_minute: int
+
+
 class RESTAPIConfigModel(BaseModel):
     host: str
     port: str
@@ -31,6 +37,8 @@ class ConfigModel(BaseModel):
 
     # All students will be processed in parts of package_of_students_size
     package_of_students_size: int  # the number of students processed at one part.
+
+    schedule_plane: PlaneConfigModel
 
     Postgres: PostgresConfigModel
     Gitlab: ServiceApiConfigModel
