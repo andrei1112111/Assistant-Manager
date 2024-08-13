@@ -20,6 +20,6 @@
 
 ## Развертывание:
 ```shell
-sudo docker pull andrei1121212/sberlab_assistant:manifest-amd64
+sudo docker pull andrei1121212/sberlab_assistant:manifest
 ```
 * установить переменные среды из .env.local.example
